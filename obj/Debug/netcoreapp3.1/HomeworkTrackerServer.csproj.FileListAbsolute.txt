@@ -1,0 +1,13 @@
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/HomeworkTrackerServer
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/HomeworkTrackerServer.deps.json
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/HomeworkTrackerServer.runtimeconfig.json
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/HomeworkTrackerServer.runtimeconfig.dev.json
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/HomeworkTrackerServer.dll
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/HomeworkTrackerServer.pdb
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.csprojAssemblyReference.cache
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.AssemblyInfoInputs.cache
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.AssemblyInfo.cs
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.dll
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.pdb
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/Newtonsoft.Json.dll
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.csproj.CopyComplete
