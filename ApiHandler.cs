@@ -125,6 +125,10 @@ namespace HomeworkTrackerServer {
 
                     status = 403;
                     return "Authentication Failed";
+                
+                case "ping":
+                    status = 200;
+                    return "pong!";
             }
             
         }
