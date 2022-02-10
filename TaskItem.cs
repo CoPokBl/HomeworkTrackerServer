@@ -1,10 +1,10 @@
 namespace HomeworkTrackerServer {
     public class TaskItem {
-        public ColouredString Text;
-        public string Class;
+        public string Text;
+        public ColouredString Class;
         public ColouredString Type;
 
-        public TaskItem(ColouredString text, string cls, ColouredString type) {
+        public TaskItem(string text, ColouredString cls, ColouredString type) {
             Text = text;
             Class = cls;
             Type = type;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json;
 
@@ -16,23 +17,29 @@ namespace HomeworkTrackerServer {
             }
             catch (Exception) {
                 // not valid request
-                return "Invalid Request";
+                return "Invalid Request, failed to convert request string to a dictionary";
             }
 
-            if (requestContent == null) return "Invalid Request";
-            if (!requestContent.ContainsKey("requestType")) return "Invalid Request";
+            if (requestContent == null) return "Invalid Request, request content is null";
+            if (!requestContent.ContainsKey("requestType")) return "Invalid Request, your request must contain the 'requestType' property";
+            string failResponse;
             
             switch (requestContent["requestType"]) {
                 
                 default:
-                    return "Invalid Request";
+                    return "Invalid requestType value";
                 
                 case "register":
-                    if (!requestContent.ContainsKey("username")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("password")) return "Invalid Request";
+                    if (!ValidArgs(new [] {
+                            "username", 
+                            "password"
+                        }, requestContent, out failResponse)) { return failResponse; }
+                    
                     // Created user
+                    if (requestContent["username"].Length > 20) return "Username cannot be longer than 20 characters";
+                    if (requestContent["password"].Length > 64) return "Password must be a 64 character (256 bit) SHA256 hash";
                     if (!Program.Storage.CreateUser(
-                            requestContent["username"], requestContent["password"])) {
+                                requestContent["username"], requestContent["password"])) {
                         status = 409;
                         return "Username taken";
                     }
@@ -41,8 +48,11 @@ namespace HomeworkTrackerServer {
                     return "Success";
                 
                 case "getTasks":
-                    if (!requestContent.ContainsKey("username")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("password")) return "Invalid Request";
+                    if (!ValidArgs(new [] {
+                            "username", 
+                            "password"
+                        }, requestContent, out failResponse)) { return failResponse; }
+                    
                     if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
                         status = 403;
                         return "Auth failed";
@@ -53,22 +63,25 @@ namespace HomeworkTrackerServer {
                     return JsonConvert.SerializeObject(items);
                 
                 case "addTask":
-                    if (!requestContent.ContainsKey("username")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("password")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("class")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("task")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("taskColour")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("type")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("typeColour")) return "Invalid Request";
-                    
+                    if (!ValidArgs(new [] {
+                            "username", 
+                            "password", 
+                            "class", 
+                            "classColour", 
+                            "task", 
+                            "type", 
+                            "typeColour"
+                        }, requestContent, out failResponse)) { return failResponse; }
+
                     if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
                         status = 403;
                         return "Auth failed";
                     }
 
                     try {
-                        Program.Storage.AddTask(requestContent["username"], requestContent["class"], 
-                            new ColouredString(requestContent["task"], Color.FromName(requestContent["taskColour"])), 
+                        Program.Storage.AddTask(requestContent["username"], 
+                            new ColouredString(requestContent["class"], Color.FromName(requestContent["classColour"])), 
+                            requestContent["task"], 
                             new ColouredString(requestContent["type"], Color.FromName(requestContent["typeColour"])));
                     }
                     catch (Exception) {
@@ -79,9 +92,11 @@ namespace HomeworkTrackerServer {
                     return "Success";
                 
                 case "checkLogin":
-                    if (!requestContent.ContainsKey("username")) return "Invalid Request";
-                    if (!requestContent.ContainsKey("password")) return "Invalid Request";
-                    Program.Debug(requestContent["password"]);
+                    if (!ValidArgs(new[] {
+                            "username", 
+                            "password"
+                        }, requestContent, out failResponse)) { return failResponse; }
+                    
                     if (Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
                         status = 200;
                         return "Authentication Successful";
@@ -92,6 +107,19 @@ namespace HomeworkTrackerServer {
             }
             
         }
+
+        private static bool ValidArgs(string[] requiredArgs, Dictionary<string, string> request, out string failReason) {
+            failReason = "";
+
+            foreach (var arg in requiredArgs) {
+                if (request.Keys.Contains(arg)) continue;
+                failReason = "You must provide the '" + arg + "' value in your request";
+                return false;
+            }
+
+            return true;
+        }
+        
     }
     
 }

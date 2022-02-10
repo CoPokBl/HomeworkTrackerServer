@@ -38,7 +38,7 @@ namespace HomeworkTrackerServer.Storage {
             return true;
         }
 
-        public void AddTask(string username, string classTxt, ColouredString task, ColouredString type) {
+        public void AddTask(string username, ColouredString classTxt, string task, ColouredString type) {
             if (!Tasks.ContainsKey(username)) {
                 Tasks.Add(username, new List<TaskItem>());
             }

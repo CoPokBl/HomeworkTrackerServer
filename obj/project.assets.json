@@ -53,11 +53,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
+      "projectUniqueName": "/home/copokbl/Documents/Code/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
       "projectName": "HomeworkTrackerServer",
-      "projectPath": "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
+      "projectPath": "/home/copokbl/Documents/Code/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
       "packagesPath": "/home/copokbl/.nuget/packages/",
-      "outputPath": "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/",
+      "outputPath": "/home/copokbl/Documents/Code/HomeworkTrackerServer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/copokbl/.nuget/NuGet/NuGet.Config"
@@ -102,7 +102,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/mnt/48CC9506CC94F004/Documents/Coding/C#/dotnet/source-build/.dotnet/sdk/3.1.115/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/current/sdk/3.1.416/RuntimeIdentifierGraph.json"
       }
     }
   }

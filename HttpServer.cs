@@ -41,32 +41,37 @@ namespace HomeworkTrackerServer {
                 string serve;
                 int status;
 
-                // Print out some info about the request
-                Program.Debug($"Request #: {++_requests}");
-                Program.Debug(req.Url.ToString());
-                Program.Debug(req.HttpMethod);
-                Program.Debug(req.UserHostName);
-                Program.Debug(req.UserAgent);
-                Program.Debug("");
+                // Print out some info about the request to debug
+                Program.Debug($"Request #{++_requests} from {req.UserHostName} on {req.UserAgent} using {req.HttpMethod}");
+                // Program.Debug(req.Url.ToString());
+                // Program.Debug(req.HttpMethod);
+                // Program.Debug(req.UserHostName);
+                // Program.Debug(req.UserAgent);
+                // Program.Debug("");
                 
                 if (req.Url.AbsolutePath.StartsWith("/api")) {
                     
                     string strmContents = GetText(req.InputStream, req.ContentLength64);
-                    try {
-                        serve = ApiHandler.Handle(req, strmContents, out status);
-                    }
-                    catch (Exception e) {
-                        Program.Error(e.ToString());
-                        status = 500;
-                        serve = "Internal Server Error";
+                    
+                    if (strmContents.Length > 1000) {
+                        status = 400;
+                        serve = "Request body cannot contain more than 1000 characters";
+                    } else {
+                        try {
+                            serve = ApiHandler.Handle(req, strmContents, out status);
+                        }
+                        catch (Exception e) {
+                            Program.Error(e.ToString());
+                            status = 500;
+                            serve = "Internal Server Error";
+                        }
                     }
 
                 }
                 else {
-                    // invalid
-                    serve = "Error 400 Bad Request. Homework Tracker server failed to process this request, all api requests must be to " +
-                                   "http://homeworktrack.serble.net/api/";
-                    status = 400;
+                    // not an API request
+                    serve = await File.ReadAllTextAsync("Homepage.html");
+                    status = 200;
                 }
 
                 // Write the response info
