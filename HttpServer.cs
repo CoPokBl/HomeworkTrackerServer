@@ -42,7 +42,7 @@ namespace HomeworkTrackerServer {
                 int status;
 
                 // Print out some info about the request to debug
-                Program.Debug($"Request #{++_requests} from {req.UserHostName} on {req.UserAgent} using {req.HttpMethod}");
+                Program.Debug($"Request #{++_requests} from '{req.UserHostName}' on '{req.UserAgent}' using '{req.HttpMethod}'");
                 // Program.Debug(req.Url.ToString());
                 // Program.Debug(req.HttpMethod);
                 // Program.Debug(req.UserHostName);
@@ -70,6 +70,7 @@ namespace HomeworkTrackerServer {
                 }
                 else {
                     // not an API request
+                    Program.Debug($"Serving homepage to {req.UserHostName}");
                     serve = await File.ReadAllTextAsync("Homepage.html");
                     status = 200;
                 }
