@@ -32,7 +32,7 @@ namespace HomeworkTrackerServer {
                     
                     // Created user
                     if (requestContent["username"].Length > 20) return "Username cannot be longer than 20 characters";
-                    if (requestContent["password"].Length > 64) return "Password must be a 64 character (256 bit) SHA256 hash";
+                    if (requestContent["password"].Length != 64) return "Password must be a 64 character (256 bit) SHA256 hash";
                     
                     if (!Program.Storage.CreateUser(
                                 requestContent["username"], requestContent["password"])) {

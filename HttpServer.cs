@@ -45,7 +45,7 @@ namespace HomeworkTrackerServer {
                     
                     string strmContents = GetText(req.InputStream, req.ContentLength64);
                     
-                    if (strmContents.Length > 1000) {
+                    if (strmContents.Length > 1024) {
                         status = 400;
                         serve = "Request body cannot contain more than 1000 characters";
                     } else {
