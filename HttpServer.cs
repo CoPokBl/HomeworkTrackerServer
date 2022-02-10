@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using JsonConverter = Newtonsoft.Json.JsonConverter;
 
 namespace HomeworkTrackerServer {
     public static class HttpServer {
@@ -20,9 +16,10 @@ namespace HomeworkTrackerServer {
         };
         
         public static async Task Start() {
-
+            
             Program.Info("Binding IPs");
             _listener = new HttpListener();
+            
             foreach (string ip in BindIPs) {
                 Program.Debug($"Binding IP: {ip}");
                 _listener.Prefixes.Add(ip);
