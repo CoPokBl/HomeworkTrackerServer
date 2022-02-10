@@ -43,12 +43,7 @@ namespace HomeworkTrackerServer {
 
                 // Print out some info about the request to debug
                 Program.Debug($"Request #{++_requests} from '{req.UserHostName}' on '{req.UserAgent}' using '{req.HttpMethod}'");
-                // Program.Debug(req.Url.ToString());
-                // Program.Debug(req.HttpMethod);
-                // Program.Debug(req.UserHostName);
-                // Program.Debug(req.UserAgent);
-                // Program.Debug("");
-                
+
                 if (req.Url.AbsolutePath.StartsWith("/api")) {
                     
                     string strmContents = GetText(req.InputStream, req.ContentLength64);

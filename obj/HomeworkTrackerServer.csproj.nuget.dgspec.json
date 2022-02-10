@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/copokbl/Documents/Code/HomeworkTrackerServer/HomeworkTrackerServer.csproj": {}
+    "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/HomeworkTrackerServer.csproj": {}
   },
   "projects": {
-    "/home/copokbl/Documents/Code/HomeworkTrackerServer/HomeworkTrackerServer.csproj": {
+    "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/HomeworkTrackerServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/copokbl/Documents/Code/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
+        "projectUniqueName": "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
         "projectName": "HomeworkTrackerServer",
-        "projectPath": "/home/copokbl/Documents/Code/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
+        "projectPath": "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/HomeworkTrackerServer.csproj",
         "packagesPath": "/home/copokbl/.nuget/packages/",
-        "outputPath": "/home/copokbl/Documents/Code/HomeworkTrackerServer/obj/",
+        "outputPath": "/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/copokbl/.nuget/NuGet/NuGet.Config"
@@ -56,7 +56,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/current/sdk/3.1.416/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/mnt/48CC9506CC94F004/Documents/Coding/C#/dotnet/source-build/.dotnet/sdk/3.1.115/RuntimeIdentifierGraph.json"
         }
       }
     }

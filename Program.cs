@@ -5,7 +5,7 @@ using HomeworkTrackerServer.Storage;
 namespace HomeworkTrackerServer {
     internal static class Program {
         private const int LoggingLevel = 3;
-        public static readonly IStorageMethod Storage = new RAMStorage();
+        public static readonly IStorageMethod Storage = new RamStorage();
 
         private static int Main(string[] args) {
             Debug("Starting Async Method...");

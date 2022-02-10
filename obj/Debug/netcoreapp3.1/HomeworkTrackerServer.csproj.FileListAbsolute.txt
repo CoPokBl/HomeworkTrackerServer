@@ -26,3 +26,4 @@
 /home/copokbl/Documents/Code/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.dll
 /home/copokbl/Documents/Code/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.pdb
 /home/copokbl/Documents/Code/HomeworkTrackerServer/obj/Debug/netcoreapp3.1/HomeworkTrackerServer.genruntimeconfig.cache
+/mnt/48CC9506CC94F004/Documents/Coding/C#/HomeworkTracker/HomeworkTrackerServer/bin/Debug/netcoreapp3.1/Homepage.html

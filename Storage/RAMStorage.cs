@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HomeworkTrackerServer.Storage {
-    public class RAMStorage : IStorageMethod {
+    public class RamStorage : IStorageMethod {
 
-        public Dictionary<string, string> Users;
-        public Dictionary<string, List<TaskItem>> Tasks;
+        public Dictionary<string, string> Users;          // Username, password
+        public Dictionary<string, List<TaskItem>> Tasks;  // Username, list of tasks
 
         public List<TaskItem> GetTasks(string username) {
             return !Tasks.ContainsKey(username) ? new List<TaskItem>() : Tasks[username];
@@ -42,7 +43,20 @@ namespace HomeworkTrackerServer.Storage {
             if (!Tasks.ContainsKey(username)) {
                 Tasks.Add(username, new List<TaskItem>());
             }
-            Tasks[username].Add(new TaskItem(task, classTxt, type));
+            
+            Tasks[username].Add(new TaskItem(task, classTxt, type, Guid.NewGuid().ToString()));
+        }
+
+        public bool RemoveTask(string username, string id) {
+            bool removed = false;
+            foreach (TaskItem task in Tasks[username].Where(task => task.Id == id)) {
+                Tasks[username].Remove(task);
+                Program.Debug($"Removed one of {username}'s tasks");
+                removed = true;
+                break;  // If there were multiple then something is wrong so who cares
+                // I'd rather it be more efficient that add more error logging
+            }
+            return removed;
         }
 
         public void Init() {

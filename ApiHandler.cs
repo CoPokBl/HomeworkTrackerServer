@@ -12,15 +12,10 @@ namespace HomeworkTrackerServer {
             Dictionary<string, string> requestContent;
             status = 400;
                     
-            try {
-                requestContent = JsonConvert.DeserializeObject<Dictionary<string, string>>(reqText);
-            }
-            catch (Exception) {
-                // not valid request
-                return "Invalid Request, failed to convert request string to a dictionary";
-            }
+            try { requestContent = JsonConvert.DeserializeObject<Dictionary<string, string>>(reqText); }
+            catch (Exception) /* not valid request */ { return "Invalid Request, malformed JSON"; }
 
-            if (requestContent == null) return "Invalid Request, request content is null";
+            if (requestContent == null)                     return "Invalid Request, request content is null";
             if (!requestContent.ContainsKey("requestType")) return "Invalid Request, your request must contain the 'requestType' property";
             string failResponse;
             
@@ -38,6 +33,7 @@ namespace HomeworkTrackerServer {
                     // Created user
                     if (requestContent["username"].Length > 20) return "Username cannot be longer than 20 characters";
                     if (requestContent["password"].Length > 64) return "Password must be a 64 character (256 bit) SHA256 hash";
+                    
                     if (!Program.Storage.CreateUser(
                                 requestContent["username"], requestContent["password"])) {
                         status = 409;
@@ -91,6 +87,31 @@ namespace HomeworkTrackerServer {
                     status = 200;
                     return "Success";
                 
+                case "removeTask":
+                    if (!ValidArgs(new [] {
+                            "username", 
+                            "password", 
+                            "id"
+                        }, requestContent, out failResponse)) { return failResponse; }
+
+                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                        status = 403;
+                        return "Auth failed";
+                    }
+
+                    if (!Guid.TryParse(requestContent["id"], out Guid id)) {
+                        return "Task ID isn't a valid GUID";
+                    }
+
+                    if (!Program.Storage.RemoveTask(requestContent["username"], id.ToString())) {
+                        // It failed
+                        return "Invalid task ID, that task doesn't exist";
+                    }
+                    
+                    // it worked and deleted the task
+                    status = 200;
+                    return "Success";
+
                 case "checkLogin":
                     if (!ValidArgs(new[] {
                             "username", 
