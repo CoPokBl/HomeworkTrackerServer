@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Threading.Tasks;
 using HomeworkTrackerServer.Storage;
 
@@ -20,17 +21,33 @@ namespace HomeworkTrackerServer {
             Info("Initialised Storage");
             
             Info("Attempting to start HTTP server...");
-            await HttpServer.Start();
-            Info("HTTP server stopped");
-            Info("Exiting...");
-            return 69;
-        }
-
-        public static void Debug(string msg, Severity severity = Severity.Debug) {
-            if (LoggingLevel > (int) severity) {
-                Console.WriteLine($"[{DateTime.Now}] [{severity}]: {msg}");
+            while (true) {  // If it crashes then restart because who cares
+                try {
+                    await HttpServer.Start();
+                }
+                catch (Exception e) {
+                    Error(e.ToString());
+                    HttpServer._listener.Prefixes.Clear(); // Remove all prefixes
+                }
             }
         }
+
+#pragma warning disable CS0162
+        public static void Debug(string msg, Severity severity = Severity.Debug) {
+            if (LoggingLevel > (int) severity) {
+                
+                ConsoleColor textColour = severity switch {
+                    Severity.Error => ConsoleColor.Red,
+                    Severity.Info => ConsoleColor.Green,
+                    _ => ConsoleColor.White
+                };
+                Console.ForegroundColor = textColour;
+                Console.WriteLine($"[{DateTime.Now}] [{severity}]: {msg}");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+        }
+        
+#pragma warning restore CS0162
         
         public static void Info(string msg) { Debug(msg, Severity.Info); }
         public static void Error(string msg) { Debug(msg, Severity.Error); }

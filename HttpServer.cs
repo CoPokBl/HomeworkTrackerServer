@@ -8,7 +8,7 @@ namespace HomeworkTrackerServer {
     public static class HttpServer {
         private const bool RunServer = true;
         private static int _requests;
-        private static HttpListener _listener;
+        public static HttpListener _listener;
         
         // Options
         private static readonly string[] BindIPs = {
@@ -41,7 +41,7 @@ namespace HomeworkTrackerServer {
                 // Print out some info about the request to debug
                 Program.Debug($"Request #{++_requests} from '{req.UserHostName}' on '{req.UserAgent}' using '{req.HttpMethod}'");
 
-                if (req.Url.AbsolutePath.StartsWith("/api")) {
+                if (req.Url != null && req.Url.AbsolutePath.StartsWith("/api")) {
                     
                     string strmContents = GetText(req.InputStream, req.ContentLength64);
                     
@@ -69,13 +69,18 @@ namespace HomeworkTrackerServer {
 
                 // Write the response info
                 byte[] data = Encoding.UTF8.GetBytes(serve);
-                resp.ContentType = "text/html";
-                resp.ContentEncoding = Encoding.UTF8;
-                resp.ContentLength64 = data.LongLength;
-                resp.StatusCode = status;
+                try {
+                    resp.ContentType = "text/html";
+                    resp.ContentEncoding = Encoding.UTF8;
+                    resp.ContentLength64 = data.LongLength;
+                    resp.StatusCode = status;
+                    
+                    // Write out to the response stream (asynchronously), then close it
+                    await resp.OutputStream.WriteAsync(data, 0, data.Length);
+                } catch (ObjectDisposedException) 
+                { Program.Error("ObjectDisposed Crash was attempted by " + req.UserHostName); }
 
-                // Write out to the response stream (asynchronously), then close it
-                await resp.OutputStream.WriteAsync(data, 0, data.Length);
+                
                 resp.Close();
             }
         }
