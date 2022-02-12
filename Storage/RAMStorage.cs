@@ -56,12 +56,12 @@ namespace HomeworkTrackerServer.Storage {
             long dueDate = 0;
 
             if (values.ContainsKey("class")) { classText = values["class"]; }
-            if (values.ContainsKey("classColour")) { classColour = values["class"]; }
-            if (values.ContainsKey("task")) { task = values["class"]; }
-            if (values.ContainsKey("type")) { typeText = values["class"]; }
-            if (values.ContainsKey("typeColour")) { typeColour = values["class"]; }
+            if (values.ContainsKey("classColour")) { classColour = values["classColour"]; }
+            if (values.ContainsKey("task")) { task = values["task"]; }
+            if (values.ContainsKey("type")) { typeText = values["type"]; }
+            if (values.ContainsKey("typeColour")) { typeColour = values["typeColour"]; }
             if (values.ContainsKey("dueDate")) 
-                if (long.Parse(values["dueDate"]) != 0) { dueDate = DateTime.FromBinary(long.Parse(values["class"])).ToBinary(); }
+                if (long.Parse(values["dueDate"]) != 0) { dueDate = DateTime.FromBinary(long.Parse(values["dueDate"])).ToBinary(); }
 
             Color classC = FromStr(classColour);
             Color typeC = FromStr(classColour);
