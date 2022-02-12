@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Threading.Tasks;
 using HomeworkTrackerServer.Storage;
 
@@ -7,6 +6,7 @@ namespace HomeworkTrackerServer {
     internal static class Program {
         private const int LoggingLevel = 3;
         public static readonly IStorageMethod Storage = new RamStorage();
+        public static Version Ver = new Version(0, 2, 0);
 
         private static int Main(string[] args) {
             Debug("Starting Async Method...");

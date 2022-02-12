@@ -61,13 +61,7 @@ namespace HomeworkTrackerServer {
                 case "addTask":
                     if (!ValidArgs(new [] {
                             "username", 
-                            "password", 
-                            "class", 
-                            "classColour", 
-                            "task", 
-                            "type", 
-                            "typeColour",
-                            "dueDate"
+                            "password"
                         }, requestContent, out failResponse)) { return failResponse; }
 
                     if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
@@ -76,13 +70,10 @@ namespace HomeworkTrackerServer {
                     }
 
                     try {
-                        Program.Storage.AddTask(requestContent["username"], 
-                            new ColouredString(requestContent["class"], Color.FromName(requestContent["classColour"])), 
-                            requestContent["task"], 
-                            new ColouredString(requestContent["type"], Color.FromName(requestContent["typeColour"])), DateTime.FromBinary(long.Parse(requestContent["dueDate"])).ToBinary());
+                        Program.Storage.AddTask(requestContent["username"], requestContent);
                     }
-                    catch (Exception) {
-                        return "A colour provided in your request was invalid";
+                    catch (Exception e) {
+                        return $"A value provided in your request was invalid: {e.Message}";
                     }
 
                     status = 200;
@@ -130,6 +121,10 @@ namespace HomeworkTrackerServer {
                 case "ping":
                     status = 200;
                     return "pong!";
+                
+                case "getVersion":
+                    status = 200;
+                    return Program.Ver.ToString();
             }
             
         }
