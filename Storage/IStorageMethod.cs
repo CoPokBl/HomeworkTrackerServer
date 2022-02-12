@@ -6,7 +6,7 @@ namespace HomeworkTrackerServer.Storage {
         public List<TaskItem> GetTasks(string username);
         public bool AuthUser(string username, string password);
         public bool CreateUser(string username, string password);
-        public void AddTask(string username, ColouredString classTxt, string task, ColouredString type);
+        public void AddTask(string username, ColouredString classTxt, string task, ColouredString type, long dueDate);
         public bool RemoveTask(string username, string id);
 
         public void Init();

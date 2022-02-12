@@ -39,12 +39,12 @@ namespace HomeworkTrackerServer.Storage {
             return true;
         }
 
-        public void AddTask(string username, ColouredString classTxt, string task, ColouredString type) {
+        public void AddTask(string username, ColouredString classTxt, string task, ColouredString type, long dueDate) {
             if (!Tasks.ContainsKey(username)) {
                 Tasks.Add(username, new List<TaskItem>());
             }
             
-            Tasks[username].Add(new TaskItem(task, classTxt, type, Guid.NewGuid().ToString()));
+            Tasks[username].Add(new TaskItem(task, classTxt, type, Guid.NewGuid().ToString(), dueDate));
         }
 
         public bool RemoveTask(string username, string id) {

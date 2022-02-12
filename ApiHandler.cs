@@ -66,7 +66,8 @@ namespace HomeworkTrackerServer {
                             "classColour", 
                             "task", 
                             "type", 
-                            "typeColour"
+                            "typeColour",
+                            "dueDate"
                         }, requestContent, out failResponse)) { return failResponse; }
 
                     if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
@@ -78,7 +79,7 @@ namespace HomeworkTrackerServer {
                         Program.Storage.AddTask(requestContent["username"], 
                             new ColouredString(requestContent["class"], Color.FromName(requestContent["classColour"])), 
                             requestContent["task"], 
-                            new ColouredString(requestContent["type"], Color.FromName(requestContent["typeColour"])));
+                            new ColouredString(requestContent["type"], Color.FromName(requestContent["typeColour"])), DateTime.FromBinary(long.Parse(requestContent["dueDate"])).ToBinary());
                     }
                     catch (Exception) {
                         return "A colour provided in your request was invalid";

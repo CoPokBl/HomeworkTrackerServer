@@ -47,7 +47,7 @@ namespace HomeworkTrackerServer {
                     
                     if (strmContents.Length > 1024) {
                         status = 400;
-                        serve = "Request body cannot contain more than 1000 characters";
+                        serve = "Request body cannot contain more than 1024 characters";
                     } else {
                         try {
                             serve = ApiHandler.Handle(req, strmContents, out status);
