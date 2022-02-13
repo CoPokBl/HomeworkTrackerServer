@@ -11,7 +11,7 @@ namespace HomeworkTrackerServer {
         private static int Main(string[] args) {
             Debug("Starting Async Method...");
             return AsyncMain(args).GetAwaiter().GetResult();
-            // Unreachable
+            // Unreachable 
         }
 
         private static async Task<int> AsyncMain(string[] args) {
