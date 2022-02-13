@@ -8,6 +8,7 @@ namespace HomeworkTrackerServer.Storage {
         public bool CreateUser(string username, string password);
         public void AddTask(string username, Dictionary<string, string> values);
         public bool RemoveTask(string username, string id);
+        public bool EditTask(string username, string id, string field, string newValue);
 
         public void Init();
     }

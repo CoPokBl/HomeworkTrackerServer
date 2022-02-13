@@ -91,16 +91,49 @@ namespace HomeworkTrackerServer {
                         return "Auth failed";
                     }
 
-                    if (!Guid.TryParse(requestContent["id"], out Guid id)) {
+                    if (!Guid.TryParse(requestContent["id"], out Guid rmid)) {
                         return "Task ID isn't a valid GUID";
                     }
 
-                    if (!Program.Storage.RemoveTask(requestContent["username"], id.ToString())) {
+                    if (!Program.Storage.RemoveTask(requestContent["username"], rmid.ToString())) {
                         // It failed
                         return "Invalid task ID, that task doesn't exist";
                     }
                     
                     // it worked and deleted the task
+                    status = 200;
+                    return "Success";
+                
+                case "editTask":
+                    if (!ValidArgs(new [] {
+                            "username", 
+                            "password", 
+                            "id",
+                            "field",
+                            "value"
+                        }, requestContent, out failResponse)) { return failResponse; }
+
+                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                        status = 403;
+                        return "Auth failed";
+                    }
+
+                    if (!Guid.TryParse(requestContent["id"], out Guid eid)) {
+                        return "Task ID isn't a valid GUID";
+                    }
+
+                    try {
+                        if (!Program.Storage.EditTask(requestContent["username"], eid.ToString(), 
+                                requestContent["field"], requestContent["value"])) {
+                            // It failed
+                            return "Invalid task ID, that task doesn't exist";
+                        }
+                    }
+                    catch (Exception e) {
+                        return "Either the field or value was invalid: " + e.Message;
+                    }
+
+                    // it worked and edited the task
                     status = 200;
                     return "Success";
 

@@ -63,8 +63,8 @@ namespace HomeworkTrackerServer.Storage {
             if (values.ContainsKey("dueDate")) 
                 if (long.Parse(values["dueDate"]) != 0) { dueDate = DateTime.FromBinary(long.Parse(values["dueDate"])).ToBinary(); }
 
-            Color classC = FromStr(classColour);
-            Color typeC = FromStr(classColour);
+            FromStr(classColour);
+            FromStr(typeColour);
 
             var outData = new Dictionary<string, string> {
                 { "class", classText },
@@ -89,6 +89,21 @@ namespace HomeworkTrackerServer.Storage {
                 // I'd rather it be more efficient that add more error logging
             }
             return removed;
+        }
+        
+        public bool EditTask(string username, string id, string field, string newValue) {
+            if (field == "id") { throw new Exception("The field 'id' cannot be edited"); }
+            bool edited = false;
+            foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
+                // Validate values for non string fields
+                if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
+                if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
+                task[field] = newValue;
+                edited = true;
+                break;  // If there were multiple then something is wrong so who cares
+                // I'd rather it be more efficient that add more error logging
+            }
+            return edited;
         }
 
         public void Init() {
