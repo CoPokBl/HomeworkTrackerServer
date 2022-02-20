@@ -12,10 +12,10 @@ I prefer to use discord for communication, you can DM me at CoPokBl#9451
 ## Clients
 Here is the current list of clients:
 ### Console Clients (These are just for testing):
-- https://github.com/Calcilore/HomeworkTrackerConsoleClient (If you'd like an example of how to make a client I recommend using this)
+- https://github.com/Calcilore/HomeworkTrackerConsoleClient (All platforms that support dotnet. If you'd like an example of how to make a client I recommend using this)
 
 ### Desktop Clients
-None yet 
+- https://github.com/CoPokBl/HomeworkTrackerUnityClient (Linux, Windows and Mac OS. Coming soon to mobile as well)
 
 ### Mobile Clients
 None yet
