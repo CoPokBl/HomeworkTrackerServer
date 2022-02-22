@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
+// TODO: Make this actually use MySQL instead of Dictionarys
 namespace HomeworkTrackerServer.Storage {
-    public class RamStorage : IStorageMethod {
+    public class MySQLStorage : IStorageMethod {
 
         public Dictionary<string, string> Users;          // Username, password
         public Dictionary<string, List<Dictionary<string, string>>> Tasks;  // Username, list of tasks
