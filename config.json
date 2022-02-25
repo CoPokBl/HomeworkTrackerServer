@@ -2,5 +2,8 @@
   "mysql_ip": "mysql.example.com",
   "mysql_database": "mydb",
   "mysql_user": "user",
-  "mysql_password": "password123"
+  "mysql_password": "password123",
+  
+  "LoggingLevel": "3",
+  "StorageMethod": "RAM"
 }

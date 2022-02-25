@@ -9,9 +9,9 @@ using Newtonsoft.Json;
 
 namespace HomeworkTrackerServer {
     internal static class Program {
-        private const int LoggingLevel = 2;
-        public static readonly IStorageMethod Storage = new MySQLStorage();
-        public static readonly Version Ver = new Version(0, 4, 2);
+        private static int _loggingLevel = 3;
+        public static IStorageMethod Storage;
+        public static readonly Version Ver = new Version(0, 4, 3);
         public static Dictionary<string, string> Config;
 
         private static int Main(string[] args) {
@@ -28,6 +28,24 @@ namespace HomeworkTrackerServer {
                     throw new System.Text.Json.JsonException("Empty file");
                 }
             } catch (JsonException) { Error("Invalid config file"); return 1; }
+
+            _loggingLevel = int.Parse(Config["LoggingLevel"]);
+
+            // Set storage method
+            switch (Config["StorageMethod"]) {
+                default:
+                    Error("Invalid StorageMethod value in config, must be MySQL or RAM");
+                    return 1;
+                
+                case "MySQL":
+                    Storage = new MySQLStorage();
+                    break;
+                
+                case "RAM":
+                    Info("Warning: StorageMethod is set to RAM, data will be deleted upon restart");
+                    Storage = new RamStorage();
+                    break;
+            }
             
             Debug("Loaded config file successfully!\nValues:\n---------------------");
             foreach (var (key, value) in Config) { Debug($"{key}, {value}"); }
@@ -66,7 +84,7 @@ namespace HomeworkTrackerServer {
 
 #pragma warning disable CS0162
         public static void Debug(string msg, Severity severity = Severity.Debug) {
-            if (LoggingLevel > (int) severity) {
+            if (_loggingLevel > (int) severity) {
                 
                 ConsoleColor textColour = severity switch {
                     Severity.Error => ConsoleColor.Red,
