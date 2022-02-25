@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace HomeworkTrackerServer {
     internal static class Program {
-        private const int LoggingLevel = 3;
+        private const int LoggingLevel = 2;
         public static readonly IStorageMethod Storage = new MySQLStorage();
         public static readonly Version Ver = new Version(0, 4, 2);
         public static Dictionary<string, string> Config;
