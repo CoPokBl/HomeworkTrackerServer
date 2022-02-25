@@ -43,6 +43,25 @@ namespace HomeworkTrackerServer {
                     status = 200;
                     return "Success";
                 
+                case "deleteAccount":
+                    
+                    if (!ValidArgs(new [] {
+                            "username", 
+                            "password"
+                        }, requestContent, out failResponse)) { return failResponse; }
+                    
+                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                        status = 403;
+                        return "Auth failed";
+                    }
+                    
+                    // Remove it
+                    Program.Storage.RemoveUser(requestContent["username"]);
+                    
+                    // Cool
+                    status = 200;
+                    return "Success";
+                
                 case "getTasks":
                     if (!ValidArgs(new [] {
                             "username", 

@@ -40,6 +40,10 @@ namespace HomeworkTrackerServer.Storage {
             return true;
         }
 
+        public void RemoveUser(string username) {
+            Users.Remove(username);
+        }
+
         public void AddTask(string username, Dictionary<string, string> values) {
             
             Program.Debug("Adding task for " + username);
@@ -98,7 +102,7 @@ namespace HomeworkTrackerServer.Storage {
                 // Validate values for non string fields
                 if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
                 if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
-                task[field] = newValue;
+                task[field] = newValue;  // This will throw if the field is invalid
                 edited = true;
                 break;  // If there were multiple then something is wrong so who cares
                 // I'd rather it be more efficient that add more error logging

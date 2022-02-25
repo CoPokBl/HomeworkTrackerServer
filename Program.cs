@@ -1,14 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using HomeworkTrackerServer.Storage;
+using Newtonsoft.Json;
+
+// TODO: Add to homepage.html
 
 namespace HomeworkTrackerServer {
     internal static class Program {
         private const int LoggingLevel = 3;
         public static readonly IStorageMethod Storage = new RamStorage();
-        public static Version Ver = new Version(0, 3, 0);
+        public static readonly Version Ver = new Version(0, 4, 1);
+        public static Dictionary<string, string> Config;
 
         private static int Main(string[] args) {
+            Info("Loading Config...");
+            if (!File.Exists("config.json")) {
+                Error("Config file (config.json) doesn't exist, please create it or rebuild project");
+                return 1;
+            }
+            Debug("Found file!");
+            Debug("Deserializing text...");
+            try {
+                Config = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("config.json"));
+                if (Config == null) {
+                    throw new System.Text.Json.JsonException("Empty file");
+                }
+            } catch (JsonException) { Error("Invalid config file"); return 1; }
+            
+            Debug("Loaded config file successfully!\nValues:\n");
+            foreach (var (key, value) in Config) { Debug($"{key}, {value}\n"); }
+            
             Debug("Starting Async Method...");
             return AsyncMain(args).GetAwaiter().GetResult();
             // Unreachable 
@@ -16,8 +39,15 @@ namespace HomeworkTrackerServer {
 
         private static async Task<int> AsyncMain(string[] args) {
             // init storage
+            
             Info("Initialising Storage");
-            Storage.Init();
+            try {
+                Storage.Init();
+            }
+            catch (Exception e) {
+                Error("Failed to initialize storage: " + e.Message);
+                Debug(e.ToString());  // Debug whole error
+            }
             Info("Initialised Storage");
             
             Info("Attempting to start HTTP server...");
@@ -26,7 +56,7 @@ namespace HomeworkTrackerServer {
                     await HttpServer.Start();
                 }
                 catch (Exception e) {
-                    Error(e.ToString());
+                    Error(e.ToString());  // Say error
                     HttpServer._listener.Prefixes.Clear(); // Remove all prefixes
                 }
             }

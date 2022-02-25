@@ -2,26 +2,59 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using MySql.Data.MySqlClient;
 
-// TODO: Make this actually use MySQL instead of Dictionarys
 namespace HomeworkTrackerServer.Storage {
+    
+    // TODO: Test it
     public class MySQLStorage : IStorageMethod {
 
-        public Dictionary<string, string> Users;          // Username, password
-        public Dictionary<string, List<Dictionary<string, string>>> Tasks;  // Username, list of tasks
+        private MySqlConnection _connection;  // MySQL Connection Object
 
         public List<Dictionary<string, string>> GetTasks(string username) {
-            return !Tasks.ContainsKey(username) ? new List<Dictionary<string, string>>() : Tasks[username];
+            
+            using var cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE owner = @user", _connection);
+            cmd.Parameters.AddWithValue("@user", username);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            List<Dictionary<string, string>> tasks = new List<Dictionary<string, string>>();
+            while (rdr.Read()) {
+                Dictionary<string, string> task = new Dictionary<string, string> {
+                    {"class", rdr.GetString("class")},
+                    {"classColour", rdr.GetString("classColour")},
+                    {"task", rdr.GetString("task")},
+                    {"type", rdr.GetString("ttype")},
+                    {"typeColour", rdr.GetString("typeColour")},
+                    {"dueDate", rdr.GetString("dueDate")},
+                    {"id", rdr.GetString("id")}
+                };
+                tasks.Add(task);
+                break;
+            }
+
+            return tasks;
         }
 
         public bool AuthUser(string username, string password) {
+            
             Program.Debug($"Authenticating user: {username}");
             
-            if (!Users.ContainsKey(username)) {
+            using var cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
+            cmd.Parameters.AddWithValue("@user", username);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            string correctPass = null;
+            bool exists = false;
+            while (rdr.Read()) {
+                correctPass = rdr.GetString("password") ?? "";
+                exists = true;
+                break;
+            }
+            
+            if (!exists) {
                 Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist"); 
                 return false;
             }
-            string correctPass = Users[username];
             if (password == correctPass) {
                 Program.Debug($"User '{username}' succeeded authentication");
                 return true;
@@ -32,22 +65,39 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         public bool CreateUser(string username, string password) {
-            if (Users.ContainsKey(username)) {
+            using var cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
+            cmd.Parameters.AddWithValue("@user", username);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            bool exists = false;
+            while (rdr.Read()) {
+                exists = true;
+                break;
+            }
+            
+            if (exists) {
                 Program.Debug($"Failed to create user {username} because that name is taken");
                 return false;
             }
-            Users.Add(username, password);
+            
+            using var cmd2 = new MySqlCommand("INSERT INTO hw_users (username, password) VALUES (@user, @pass)", _connection);
+            cmd2.Parameters.AddWithValue("@user", username);
+            cmd2.Parameters.AddWithValue("@pass", password);
+            cmd2.ExecuteNonQuery();
             Program.Debug($"Created user {username}");
             return true;
+        }
+
+        public void RemoveUser(string username) {
+            using var cmd2 = new MySqlCommand("DELETE FROM hw_users WHERE username=@user", _connection);
+            cmd2.Parameters.AddWithValue("@user", username);
+            cmd2.ExecuteNonQuery();
+            Program.Debug($"Removed User: {username}");
         }
 
         public void AddTask(string username, Dictionary<string, string> values) {
             
             Program.Debug("Adding task for " + username);
-            
-            if (!Tasks.ContainsKey(username)) {
-                Tasks.Add(username, new List<Dictionary<string, string>>());
-            }
 
             string classText = "None";
             string classColour = "-1.-1.-1";
@@ -76,40 +126,62 @@ namespace HomeworkTrackerServer.Storage {
                 { "dueDate", dueDate.ToString() },
                 { "id", Guid.NewGuid().ToString() }
             };
-            
-            Tasks[username].Add(outData);
+            using var cmd2 = new MySqlCommand(
+                "INSERT INTO hw_tasks (owner, class, classColour, task, ttype, typeColour, dueDate, id) " +
+                "VALUES (@user, @class, @cc, @task, @ttype, @tc, @due, @id)", _connection);
+            cmd2.Parameters.AddWithValue("@user", username);
+            cmd2.Parameters.AddWithValue("@class", outData["class"]);
+            cmd2.Parameters.AddWithValue("@cc", outData["classColour"]);
+            cmd2.Parameters.AddWithValue("@task", outData["task"]);
+            cmd2.Parameters.AddWithValue("@ttype", outData["type"]);
+            cmd2.Parameters.AddWithValue("@tc", outData["typeColour"]);
+            cmd2.Parameters.AddWithValue("@due", outData["dueDate"]);
+            cmd2.Parameters.AddWithValue("@id", outData["id"]);
+            cmd2.ExecuteNonQuery();
         }
 
-        public bool RemoveTask(string username, string id) {
-            bool removed = false;
-            foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
-                Tasks[username].Remove(task);
-                Program.Debug($"Removed one of {username}'s tasks");
-                removed = true;
-                break;  // If there were multiple then something is wrong so who cares
-                // I'd rather it be more efficient that add more error logging
-            }
-            return removed;
+        public bool RemoveTask(string username /* This is needed for RAMManager because of the way it is setup */, string id) {
+            using var cmd2 = new MySqlCommand("DELETE FROM hw_tasks WHERE id=@id", _connection);
+            cmd2.Parameters.AddWithValue("@id", id);
+            cmd2.ExecuteNonQuery();
+            Program.Debug($"Removed: {id} from {username}'s tasks");
+            return true;
         }
         
         public bool EditTask(string username, string id, string field, string newValue) {
-            if (field == "id") { throw new Exception("The field 'id' cannot be edited"); }
-            bool edited = false;
-            foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
-                // Validate values for non string fields
-                if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
-                if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
-                task[field] = newValue;
-                edited = true;
-                break;  // If there were multiple then something is wrong so who cares
-                // I'd rather it be more efficient that add more error logging
-            }
-            return edited;
+            if (field == "id" || field == "owner") { throw new ArgumentException($"The field '{field}' cannot be edited"); }
+            if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
+            if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
+            
+            using var cmd2 = new MySqlCommand("UPDATE hw_tasks SET @field=@value WHERE id=@id", _connection);
+            cmd2.Parameters.AddWithValue("@field", field);
+            cmd2.Parameters.AddWithValue("@value", newValue);
+            cmd2.Parameters.AddWithValue("@id", id);
+            cmd2.ExecuteNonQuery();
+            Program.Debug($"Edited {id} from {username}'s tasks");
+            return true;
         }
 
         public void Init() {
-            Users = new Dictionary<string, string>();
-            Tasks = new Dictionary<string, List<Dictionary<string, string>>>();
+            Program.Info("Connecting to MySQL...");
+            string cs = $"server={Program.Config["mysql_ip"]};" +
+                        $"userid={Program.Config["mysql_user"]};" +
+                        $"password={Program.Config["mysql_password"]};" +
+                        $"database={Program.Config["mysql_database"]}";
+
+            try {
+                _connection = new MySqlConnection(cs);
+                _connection.Open();
+            }
+            catch (Exception e) {
+                Program.Debug(e.ToString());
+                throw new Exception("Failed to connect to MySQL");
+            }
+            Program.Info("Connected MySQL");
+            Program.Debug($"MySQL Version: {_connection.ServerVersion}");
+            Program.Info("Creating tables in MySQL...");
+            CreateTables();
+            Program.Info("Created MySQL tables");
         }
         
         private static Color FromStr(string str) {
@@ -119,6 +191,26 @@ namespace HomeworkTrackerServer.Storage {
             string[] strs = str.Split(".");
             return Color.FromArgb(255, Convert.ToInt32(strs[0]), Convert.ToInt32(strs[1]), Convert.ToInt32(strs[2]));
         }
-        
+
+        private void CreateTables() {
+            SendMySqlStatement(@"CREATE TABLE IF NOT EXISTS hw_users(username VARCHAR(255), password VARCHAR(64))");
+            SendMySqlStatement(@"CREATE TABLE IF NOT EXISTS hw_tasks(" +
+                               "owner VARCHAR(255), " +
+                               "class VARCHAR(255), " +
+                               "classColour VARCHAR(11), " +
+                               "task VARCHAR(255), " +
+                               "ttype VARCHAR(255)), " + 
+                               "typeColour VARCHAR(11), " + 
+                               "dueDate VARCHAR(64), " + 
+                               "id VARCHAR(64)");
+        }
+
+        private void SendMySqlStatement(string statement) {
+            using var cmd = new MySqlCommand();
+            cmd.Connection = _connection;
+            cmd.CommandText = statement;
+            cmd.ExecuteNonQuery();
+        }
+
     }
 }
