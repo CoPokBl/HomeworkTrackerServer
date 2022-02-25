@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using MySql.Data.MySqlClient;
+using Ubiety.Dns.Core.Records;
 
 namespace HomeworkTrackerServer.Storage {
     
-    // TODO: Test it
     public class MySQLStorage : IStorageMethod {
 
         private MySqlConnection _connection;  // MySQL Connection Object
@@ -31,6 +31,7 @@ namespace HomeworkTrackerServer.Storage {
                 tasks.Add(task);
                 break;
             }
+            rdr.Close();
 
             return tasks;
         }
@@ -50,6 +51,7 @@ namespace HomeworkTrackerServer.Storage {
                 exists = true;
                 break;
             }
+            rdr.Close();
             
             if (!exists) {
                 Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist"); 
@@ -74,6 +76,7 @@ namespace HomeworkTrackerServer.Storage {
                 exists = true;
                 break;
             }
+            rdr.Close();
             
             if (exists) {
                 Program.Debug($"Failed to create user {username} because that name is taken");
@@ -153,7 +156,7 @@ namespace HomeworkTrackerServer.Storage {
             if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
             if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
             
-            using var cmd2 = new MySqlCommand("UPDATE hw_tasks SET @field=@value WHERE id=@id", _connection);
+            using MySqlCommand cmd2 = new MySqlCommand("UPDATE hw_tasks SET @field=@value WHERE id=@id", _connection);
             cmd2.Parameters.AddWithValue("@field", field);
             cmd2.Parameters.AddWithValue("@value", newValue);
             cmd2.Parameters.AddWithValue("@id", id);
@@ -199,10 +202,10 @@ namespace HomeworkTrackerServer.Storage {
                                "class VARCHAR(255), " +
                                "classColour VARCHAR(11), " +
                                "task VARCHAR(255), " +
-                               "ttype VARCHAR(255)), " + 
+                               "ttype VARCHAR(255), " + 
                                "typeColour VARCHAR(11), " + 
                                "dueDate VARCHAR(64), " + 
-                               "id VARCHAR(64)");
+                               "id VARCHAR(64))");
         }
 
         private void SendMySqlStatement(string statement) {

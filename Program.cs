@@ -10,8 +10,8 @@ using Newtonsoft.Json;
 namespace HomeworkTrackerServer {
     internal static class Program {
         private const int LoggingLevel = 3;
-        public static readonly IStorageMethod Storage = new RamStorage();
-        public static readonly Version Ver = new Version(0, 4, 1);
+        public static readonly IStorageMethod Storage = new MySQLStorage();
+        public static readonly Version Ver = new Version(0, 4, 2);
         public static Dictionary<string, string> Config;
 
         private static int Main(string[] args) {
@@ -29,8 +29,9 @@ namespace HomeworkTrackerServer {
                 }
             } catch (JsonException) { Error("Invalid config file"); return 1; }
             
-            Debug("Loaded config file successfully!\nValues:\n");
-            foreach (var (key, value) in Config) { Debug($"{key}, {value}\n"); }
+            Debug("Loaded config file successfully!\nValues:\n---------------------");
+            foreach (var (key, value) in Config) { Debug($"{key}, {value}"); }
+            Debug("---------------------");
             
             Debug("Starting Async Method...");
             return AsyncMain(args).GetAwaiter().GetResult();
@@ -47,6 +48,7 @@ namespace HomeworkTrackerServer {
             catch (Exception e) {
                 Error("Failed to initialize storage: " + e.Message);
                 Debug(e.ToString());  // Debug whole error
+                return 1;
             }
             Info("Initialised Storage");
             
