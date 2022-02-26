@@ -2,26 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace HomeworkTrackerServer.Storage {
     public class RamStorage : IStorageMethod {
+        private Dictionary<string, string> _users;                            // Username, password
+        private Dictionary<string, List<Dictionary<string, string>>> _tasks;  // Username, list of tasks
+        
+        private static string Hash(string str) {
+            StringBuilder builder = new StringBuilder();  
+            foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(str))) {
+                builder.Append(t.ToString("x2"));
+            }
 
-        public Dictionary<string, string> Users;          // Username, password
-        public Dictionary<string, List<Dictionary<string, string>>> Tasks;  // Username, list of tasks
+            return builder.ToString();
+        }
 
         public List<Dictionary<string, string>> GetTasks(string username) {
-            return !Tasks.ContainsKey(username) ? new List<Dictionary<string, string>>() : Tasks[username];
+            return !_tasks.ContainsKey(username) ? new List<Dictionary<string, string>>() : _tasks[username];
         }
 
         public bool AuthUser(string username, string password) {
             Program.Debug($"Authenticating user: {username}");
             
-            if (!Users.ContainsKey(username)) {
+            if (!_users.ContainsKey(username)) {
                 Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist"); 
                 return false;
             }
-            string correctPass = Users[username];
-            if (password == correctPass) {
+            string correctPass = _users[username];
+            if (Hash(password) == correctPass) {
                 Program.Debug($"User '{username}' succeeded authentication");
                 return true;
             }
@@ -31,25 +41,25 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         public bool CreateUser(string username, string password) {
-            if (Users.ContainsKey(username)) {
+            if (_users.ContainsKey(username)) {
                 Program.Debug($"Failed to create user {username} because that name is taken");
                 return false;
             }
-            Users.Add(username, password);
+            _users.Add(username, password);
             Program.Debug($"Created user {username}");
             return true;
         }
 
         public void RemoveUser(string username) {
-            Users.Remove(username);
+            _users.Remove(username);
         }
 
         public void AddTask(string username, Dictionary<string, string> values) {
             
             Program.Debug("Adding task for " + username);
             
-            if (!Tasks.ContainsKey(username)) {
-                Tasks.Add(username, new List<Dictionary<string, string>>());
+            if (!_tasks.ContainsKey(username)) {
+                _tasks.Add(username, new List<Dictionary<string, string>>());
             }
 
             string classText = "None";
@@ -80,13 +90,13 @@ namespace HomeworkTrackerServer.Storage {
                 { "id", Guid.NewGuid().ToString() }
             };
             
-            Tasks[username].Add(outData);
+            _tasks[username].Add(outData);
         }
 
         public bool RemoveTask(string username, string id) {
             bool removed = false;
-            foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
-                Tasks[username].Remove(task);
+            foreach (Dictionary<string, string> task in _tasks[username].Where(task => task["id"] == id)) {
+                _tasks[username].Remove(task);
                 Program.Debug($"Removed one of {username}'s tasks");
                 removed = true;
                 break;  // If there were multiple then something is wrong so who cares
@@ -98,7 +108,7 @@ namespace HomeworkTrackerServer.Storage {
         public bool EditTask(string username, string id, string field, string newValue) {
             if (field == "id") { throw new Exception("The field 'id' cannot be edited"); }
             bool edited = false;
-            foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
+            foreach (Dictionary<string, string> task in _tasks[username].Where(task => task["id"] == id)) {
                 // Validate values for non string fields
                 if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
                 if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
@@ -111,8 +121,8 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         public void Init() {
-            Users = new Dictionary<string, string>();
-            Tasks = new Dictionary<string, List<Dictionary<string, string>>>();
+            _users = new Dictionary<string, string>();
+            _tasks = new Dictionary<string, List<Dictionary<string, string>>>();
         }
         
         private static Color FromStr(string str) {

@@ -17,6 +17,7 @@
     <ItemGroup>
       <PackageReference Include="MySql.Data" Version="8.0.28" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
     </ItemGroup>
 
 </Project>

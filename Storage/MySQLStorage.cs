@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using MySql.Data.MySqlClient;
 using Ubiety.Dns.Core.Records;
 
@@ -10,6 +12,16 @@ namespace HomeworkTrackerServer.Storage {
     public class MySQLStorage : IStorageMethod {
 
         private MySqlConnection _connection;  // MySQL Connection Object
+
+
+        private static string Hash(string str) {
+            StringBuilder builder = new StringBuilder();  
+            foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(str))) {
+                builder.Append(t.ToString("x2"));
+            }
+
+            return builder.ToString();
+        }
 
         public List<Dictionary<string, string>> GetTasks(string username) {
             
@@ -57,7 +69,7 @@ namespace HomeworkTrackerServer.Storage {
                 Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist"); 
                 return false;
             }
-            if (password == correctPass) {
+            if (Hash(password) == correctPass) {
                 Program.Debug($"User '{username}' succeeded authentication");
                 return true;
             }
@@ -85,7 +97,7 @@ namespace HomeworkTrackerServer.Storage {
             
             using var cmd2 = new MySqlCommand("INSERT INTO hw_users (username, password) VALUES (@user, @pass)", _connection);
             cmd2.Parameters.AddWithValue("@user", username);
-            cmd2.Parameters.AddWithValue("@pass", password);
+            cmd2.Parameters.AddWithValue("@pass", Hash(password));
             cmd2.ExecuteNonQuery();
             Program.Debug($"Created user {username}");
             return true;

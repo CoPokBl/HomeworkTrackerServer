@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net;
@@ -9,6 +10,22 @@ namespace HomeworkTrackerServer {
     public static class ApiHandler {
         
         public static string Handle(HttpListenerRequest req, string reqText, out int status) {
+            
+            // Get auth
+            bool authenticated;
+            string username;
+            try {
+                string token = req.Headers["x-api-token"];
+                // do magic
+                authenticated = TokenHandler.ValidateCurrentToken(token, out username);
+            }
+            catch (Exception e) {
+                // header isn't there
+                Program.Debug(e.ToString());
+                username = "";
+                authenticated = false;
+            }
+            
             Dictionary<string, string> requestContent;
             status = 400;
                     
@@ -24,6 +41,20 @@ namespace HomeworkTrackerServer {
                 default:
                     return "Invalid requestType value";
                 
+                case "login":
+                    if (!ValidArgs(new [] {
+                            "username", 
+                            "password"
+                        }, requestContent, out failResponse)) { return failResponse; }
+
+                    if (Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                        // login success
+                        status = 200;
+                        return TokenHandler.GenerateToken(requestContent["username"]);  // Give em da token
+                    }
+                    status = 403;
+                    return "Invalid Username/Password";
+                
                 case "register":
                     if (!ValidArgs(new [] {
                             "username", 
@@ -31,11 +62,10 @@ namespace HomeworkTrackerServer {
                         }, requestContent, out failResponse)) { return failResponse; }
                     
                     // Created user
-                    if (requestContent["username"].Length > 20) return "Username cannot be longer than 20 characters";
-                    if (requestContent["password"].Length != 64) return "Password must be a 64 character (256 bit) SHA256 hash";
-                    
+                    if (requestContent["username"].Length > 64) return "Username cannot be longer than 64 characters";
+
                     if (!Program.Storage.CreateUser(
-                                requestContent["username"], requestContent["password"])) {
+                            requestContent["username"], requestContent["password"])) {
                         status = 409;
                         return "Username taken";
                     }
@@ -44,52 +74,39 @@ namespace HomeworkTrackerServer {
                     return "Success";
                 
                 case "deleteAccount":
-                    
-                    if (!ValidArgs(new [] {
-                            "username", 
-                            "password"
-                        }, requestContent, out failResponse)) { return failResponse; }
-                    
-                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+
+                    if (!authenticated) {
                         status = 403;
-                        return "Auth failed";
+                        return "Invalid Token";
                     }
-                    
+
                     // Remove it
-                    Program.Storage.RemoveUser(requestContent["username"]);
+                    Program.Storage.RemoveUser(username);
                     
                     // Cool
                     status = 200;
                     return "Success";
                 
                 case "getTasks":
-                    if (!ValidArgs(new [] {
-                            "username", 
-                            "password"
-                        }, requestContent, out failResponse)) { return failResponse; }
                     
-                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                    if (!authenticated) {
                         status = 403;
-                        return "Auth failed";
+                        return "Invalid Token";
                     }
 
-                    var items = Program.Storage.GetTasks(requestContent["username"]);
+                    var items = Program.Storage.GetTasks(username);
                     status = 200;
                     return JsonConvert.SerializeObject(items);
                 
                 case "addTask":
-                    if (!ValidArgs(new [] {
-                            "username", 
-                            "password"
-                        }, requestContent, out failResponse)) { return failResponse; }
 
-                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                    if (!authenticated) {
                         status = 403;
-                        return "Auth failed";
+                        return "Invalid Token";
                     }
 
                     try {
-                        Program.Storage.AddTask(requestContent["username"], requestContent);
+                        Program.Storage.AddTask(username, requestContent);
                     }
                     catch (Exception e) {
                         return $"A value provided in your request was invalid: {e.Message}";
@@ -100,21 +117,19 @@ namespace HomeworkTrackerServer {
                 
                 case "removeTask":
                     if (!ValidArgs(new [] {
-                            "username", 
-                            "password", 
                             "id"
                         }, requestContent, out failResponse)) { return failResponse; }
 
-                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                    if (!authenticated) {
                         status = 403;
-                        return "Auth failed";
+                        return "Invalid Token";
                     }
 
                     if (!Guid.TryParse(requestContent["id"], out Guid rmid)) {
                         return "Task ID isn't a valid GUID";
                     }
 
-                    if (!Program.Storage.RemoveTask(requestContent["username"], rmid.ToString())) {
+                    if (!Program.Storage.RemoveTask(username, rmid.ToString())) {
                         // It failed
                         return "Invalid task ID, that task doesn't exist";
                     }
@@ -125,16 +140,14 @@ namespace HomeworkTrackerServer {
                 
                 case "editTask":
                     if (!ValidArgs(new [] {
-                            "username", 
-                            "password", 
                             "id",
                             "field",
                             "value"
                         }, requestContent, out failResponse)) { return failResponse; }
 
-                    if (!Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                    if (!authenticated) {
                         status = 403;
-                        return "Auth failed";
+                        return "Invalid Token";
                     }
 
                     if (!Guid.TryParse(requestContent["id"], out Guid eid)) {
@@ -142,7 +155,7 @@ namespace HomeworkTrackerServer {
                     }
 
                     try {
-                        if (!Program.Storage.EditTask(requestContent["username"], eid.ToString(), 
+                        if (!Program.Storage.EditTask(username, eid.ToString(), 
                                 requestContent["field"], requestContent["value"])) {
                             // It failed
                             return "Invalid task ID, that task doesn't exist";
@@ -157,19 +170,13 @@ namespace HomeworkTrackerServer {
                     return "Success";
 
                 case "checkLogin":
-                    if (!ValidArgs(new[] {
-                            "username", 
-                            "password"
-                        }, requestContent, out failResponse)) { return failResponse; }
-                    
-                    if (Program.Storage.AuthUser(requestContent["username"], requestContent["password"])) {
+                    if (authenticated) {
                         status = 200;
-                        return "Authentication Successful";
+                        return "Valid Token";
                     }
-
                     status = 403;
-                    return "Authentication Failed";
-                
+                    return "Invalid Token";
+
                 case "ping":
                     status = 200;
                     return "pong!";
