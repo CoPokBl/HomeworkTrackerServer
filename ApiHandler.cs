@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using System.Net;
 using Newtonsoft.Json;
@@ -25,13 +23,23 @@ namespace HomeworkTrackerServer {
                 username = "";
                 authenticated = false;
             }
-            
+
             Dictionary<string, string> requestContent;
             status = 400;
                     
             try { requestContent = JsonConvert.DeserializeObject<Dictionary<string, string>>(reqText); }
             catch (Exception) /* not valid request */ { return "Invalid Request, malformed JSON"; }
 
+            foreach(var item in requestContent)
+            {
+                // Evaluate keys and values with RegEx. Dont touch RegEx here >
+                if (!System.Text.RegularExpressions.Regex.IsMatch(item.Key, "^[a-zA-Z0-9 ]") || 
+                    !System.Text.RegularExpressions.Regex.IsMatch(item.Value, "^[a-zA-Z0-9 ]")) {
+                    
+                    return "Invalid Request, request cannot be empty and must only contain a-z, A-Z or 0-9";
+                }
+            }
+                
             if (requestContent == null)                     return "Invalid Request, request content is null";
             if (!requestContent.ContainsKey("requestType")) return "Invalid Request, your request must contain the 'requestType' property";
             string failResponse;
@@ -39,7 +47,7 @@ namespace HomeworkTrackerServer {
             switch (requestContent["requestType"]) {
                 
                 default:
-                    return "Invalid requestType value";
+                    return "Invalid request Type value";
                 
                 case "login":
                     if (!ValidArgs(new [] {
