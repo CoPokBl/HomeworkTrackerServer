@@ -14,7 +14,8 @@ namespace HomeworkTrackerServer {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new Claim[] {
-                    new Claim(ClaimTypes.NameIdentifier, username),
+                    new Claim("username", username),
+                    new Claim("password", Program.Storage.GetUserPassword(username))
                 }),
                 Expires = DateTime.UtcNow.AddHours(int.Parse(Program.Config["TokenExpirationHours"])),
                 Issuer = Program.Config["TokenIssuer"],
@@ -46,8 +47,28 @@ namespace HomeworkTrackerServer {
             }
             JwtSecurityTokenHandler tokenHandler2 = new JwtSecurityTokenHandler();
             JwtSecurityToken securityToken = tokenHandler2.ReadToken(token) as JwtSecurityToken;
-            string stringClaimValue = securityToken!.Claims.First(claim => claim.Type == "nameid").Value;
-            username = stringClaimValue;
+            string user = null;
+            string pass = null;
+            foreach (Claim claim in securityToken.Claims) {
+                switch (claim.Type) {
+                    
+                    case "username":
+                        user = claim.Value;
+                        break;
+                    
+                    case "password":
+                        pass = claim.Value;
+                        break;
+                }
+            }
+
+            string correctPass = Program.Storage.GetUserPassword(user);
+            if (pass != correctPass) {
+                // wrong password hash in token
+                throw new Exception("Invalid password in token");
+            }
+            //string stringClaimValue = securityToken!.Claims.First(claim => claim.Type == "nameid").Value;
+            username = user;
             return true;
         }
         

@@ -15,7 +15,7 @@ namespace HomeworkTrackerServer {
             bool authenticated;
             string username;
             try {
-                string token = req.Headers["x-api-token"];
+                string token = req.Headers["x-api-token"].Replace("!", ".");
                 // do magic
                 authenticated = TokenHandler.ValidateCurrentToken(token, out username);
             }
@@ -69,6 +69,22 @@ namespace HomeworkTrackerServer {
                         status = 409;
                         return "Username taken";
                     }
+
+                    status = 200;
+                    return "Success";
+                
+                case "changePassword":
+                    
+                    if (!ValidArgs(new [] {
+                            "password"
+                        }, requestContent, out failResponse)) { return failResponse; }
+                    
+                    if (!authenticated) {
+                        status = 403;
+                        return "Invalid Token";
+                    }
+                    
+                    Program.Storage.ChangePassword(username, requestContent["password"]);
 
                     status = 200;
                     return "Success";

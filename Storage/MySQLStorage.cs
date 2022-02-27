@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
@@ -15,7 +16,7 @@ namespace HomeworkTrackerServer.Storage {
 
 
         private static string Hash(string str) {
-            StringBuilder builder = new StringBuilder();  
+            StringBuilder builder = new StringBuilder();
             foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(str))) {
                 builder.Append(t.ToString("x2"));
             }
@@ -23,9 +24,34 @@ namespace HomeworkTrackerServer.Storage {
             return builder.ToString();
         }
 
+        public string GetUserPassword(string username) {
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
+            cmd.Parameters.AddWithValue("@user", username);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            string correctPass = null;
+            bool exists = false;
+            while (rdr.Read()) {
+                correctPass = rdr.GetString("password") ?? "";
+                exists = true;
+                break;
+            }
+            rdr.Close();
+
+            return correctPass;
+        }
+
+        public void ChangePassword(string username, string newPassword) {
+            using MySqlCommand cmd = new MySqlCommand(
+                "UPDATE hw_users SET password=@value WHERE username=@user", _connection);
+            cmd.Parameters.AddWithValue("@user", username);
+            cmd.Parameters.AddWithValue("@value", newPassword);
+            cmd.ExecuteNonQuery();
+        }
+
         public List<Dictionary<string, string>> GetTasks(string username) {
             
-            using var cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE owner = @user", _connection);
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE owner=@user", _connection);
             cmd.Parameters.AddWithValue("@user", username);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
@@ -41,7 +67,6 @@ namespace HomeworkTrackerServer.Storage {
                     {"id", rdr.GetString("id")}
                 };
                 tasks.Add(task);
-                break;
             }
             rdr.Close();
 
@@ -52,7 +77,7 @@ namespace HomeworkTrackerServer.Storage {
             
             Program.Debug($"Authenticating user: {username}");
             
-            using var cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
             cmd.Parameters.AddWithValue("@user", username);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
@@ -79,7 +104,7 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         public bool CreateUser(string username, string password) {
-            using var cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
             cmd.Parameters.AddWithValue("@user", username);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
@@ -95,7 +120,7 @@ namespace HomeworkTrackerServer.Storage {
                 return false;
             }
             
-            using var cmd2 = new MySqlCommand("INSERT INTO hw_users (username, password) VALUES (@user, @pass)", _connection);
+            using MySqlCommand cmd2 = new MySqlCommand("INSERT INTO hw_users (username, password) VALUES (@user, @pass)", _connection);
             cmd2.Parameters.AddWithValue("@user", username);
             cmd2.Parameters.AddWithValue("@pass", Hash(password));
             cmd2.ExecuteNonQuery();
@@ -104,7 +129,7 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         public void RemoveUser(string username) {
-            using var cmd2 = new MySqlCommand("DELETE FROM hw_users WHERE username=@user", _connection);
+            using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_users WHERE username=@user", _connection);
             cmd2.Parameters.AddWithValue("@user", username);
             cmd2.ExecuteNonQuery();
             Program.Debug($"Removed User: {username}");
@@ -141,7 +166,7 @@ namespace HomeworkTrackerServer.Storage {
                 { "dueDate", dueDate.ToString() },
                 { "id", Guid.NewGuid().ToString() }
             };
-            using var cmd2 = new MySqlCommand(
+            using MySqlCommand cmd2 = new MySqlCommand(
                 "INSERT INTO hw_tasks (owner, class, classColour, task, ttype, typeColour, dueDate, id) " +
                 "VALUES (@user, @class, @cc, @task, @ttype, @tc, @due, @id)", _connection);
             cmd2.Parameters.AddWithValue("@user", username);
@@ -156,7 +181,7 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         public bool RemoveTask(string username /* This is needed for RAMManager because of the way it is setup */, string id) {
-            using var cmd2 = new MySqlCommand("DELETE FROM hw_tasks WHERE id=@id", _connection);
+            using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_tasks WHERE id=@id", _connection);
             cmd2.Parameters.AddWithValue("@id", id);
             cmd2.ExecuteNonQuery();
             Program.Debug($"Removed: {id} from {username}'s tasks");
@@ -221,7 +246,7 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         private void SendMySqlStatement(string statement) {
-            using var cmd = new MySqlCommand();
+            using MySqlCommand cmd = new MySqlCommand();
             cmd.Connection = _connection;
             cmd.CommandText = statement;
             cmd.ExecuteNonQuery();

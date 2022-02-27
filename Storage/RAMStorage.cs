@@ -120,6 +120,14 @@ namespace HomeworkTrackerServer.Storage {
             return edited;
         }
 
+        public string GetUserPassword(string username) {
+            return _users[username];
+        }
+
+        public void ChangePassword(string username, string newPassword) {
+            _users[username] = newPassword;
+        }
+
         public void Init() {
             _users = new Dictionary<string, string>();
             _tasks = new Dictionary<string, List<Dictionary<string, string>>>();

@@ -11,7 +11,7 @@ namespace HomeworkTrackerServer {
     internal static class Program {
         private static int _loggingLevel = 3;
         public static IStorageMethod Storage;
-        public static readonly Version Ver = new Version(0, 4, 3);
+        public static readonly Version Ver = new Version(0, 6, 3);
         public static Dictionary<string, string> Config;
 
         private static int Main(string[] args) {
