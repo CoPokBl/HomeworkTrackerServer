@@ -1,5 +1,3 @@
-using System;
-
 namespace HomeworkTrackerServer {
     public class TaskItem {
         public string Text;
