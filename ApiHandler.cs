@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace HomeworkTrackerServer {
     public static class ApiHandler {
-        
+
         public static string Handle(HttpListenerRequest req, string reqText, out int status) {
             
             // Get auth
@@ -17,9 +18,8 @@ namespace HomeworkTrackerServer {
                 // do magic
                 authenticated = TokenHandler.ValidateCurrentToken(token, out username);
             }
-            catch (Exception e) {
+            catch (Exception) {
                 // header isn't there
-                Program.Debug(e.ToString());
                 username = "";
                 authenticated = false;
             }
@@ -30,20 +30,16 @@ namespace HomeworkTrackerServer {
             try { requestContent = JsonConvert.DeserializeObject<Dictionary<string, string>>(reqText); }
             catch (Exception) /* not valid request */ { return "Invalid Request, malformed JSON"; }
 
-            foreach(var item in requestContent)
-            {
-                // Evaluate keys and values with RegEx. Dont touch RegEx here >
-                if (!System.Text.RegularExpressions.Regex.IsMatch(item.Key, "^[a-zA-Z0-9 ]") || 
-                    !System.Text.RegularExpressions.Regex.IsMatch(item.Value, "^[a-zA-Z0-9 ]")) {
-                    
-                    return "Invalid Request, request cannot be empty and must only contain a-z, A-Z or 0-9";
-                }
-            }
-                
             if (requestContent == null)                     return "Invalid Request, request content is null";
             if (!requestContent.ContainsKey("requestType")) return "Invalid Request, your request must contain the 'requestType' property";
             string failResponse;
-            
+
+            // Breaks some args
+            // if (requestContent.Any(item => !Regex.IsMatch(item.Key, "^[a-zA-Z0-9 ] -,!?. ") || 
+            //                                !Regex.IsMatch(item.Value, "^[a-zA-Z0-9 ] -,!?. "))) {
+            //     return "Invalid Request, request cannot be empty and must only contain a-z, A-Z or 0-9";
+            // }
+
             switch (requestContent["requestType"]) {
                 
                 default:
@@ -215,7 +211,7 @@ namespace HomeworkTrackerServer {
         private static bool ValidArgs(string[] requiredArgs, Dictionary<string, string> request, out string failReason) {
             failReason = "";
 
-            foreach (var arg in requiredArgs) {
+            foreach (string arg in requiredArgs) {
                 if (request.Keys.Contains(arg)) continue;
                 failReason = "You must provide the '" + arg + "' value in your request";
                 return false;
