@@ -34,13 +34,19 @@ namespace HomeworkTrackerServer {
                 // Peel out the requests and response objects
                 var req = ctx.Request;
                 var resp = ctx.Response;
+                
+                if (req == null) {
+                    // They kinda need this
+                    Program.Debug("Prevented object disposed crash");
+                    return; // just kick em out
+                }
 
                 string serve;
                 int status;
 
                 // Print out some info about the request to debug
                 Program.Debug($"Request #{++_requests} from '{req.UserHostName}' on '{req.UserAgent}' using '{req.HttpMethod}'");
-
+                
                 if (req.Url != null && req.Url.AbsolutePath.StartsWith("/api")) {
                     
                     string strmContents = GetText(req.InputStream, req.ContentLength64);
@@ -77,8 +83,10 @@ namespace HomeworkTrackerServer {
                     
                     // Write out to the response stream (asynchronously), then close it
                     await resp.OutputStream.WriteAsync(data, 0, data.Length);
-                } catch (ObjectDisposedException) 
-                { Program.Error("ObjectDisposed Crash was attempted by " + req.UserHostName); }
+                } catch (ObjectDisposedException) { 
+                    Program.Debug("Caught ObjectDisposedException to prevent crash");
+                    /* Catching is the only reliable way to check if an object is disposed */ 
+                }
 
                 
                 resp.Close();
