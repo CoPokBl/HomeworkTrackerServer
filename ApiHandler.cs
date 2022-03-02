@@ -14,7 +14,7 @@ namespace HomeworkTrackerServer {
             bool authenticated;
             string username;
             try {
-                string token = req.Headers["x-api-token"].Replace("!", ".");
+                string token = req.Headers["x-api-token"];
                 // do magic
                 authenticated = TokenHandler.ValidateCurrentToken(token, out username);
             }
