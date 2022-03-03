@@ -12,7 +12,7 @@ namespace HomeworkTrackerServer {
         
         // Options
         private static readonly string[] BindIPs = {
-            "http://*:9898/"
+            "http://*:9899/"
         };
         
         public static async Task Start() {

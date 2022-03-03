@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Web;
 using Newtonsoft.Json;
 
 namespace HomeworkTrackerServer {
@@ -26,9 +27,18 @@ namespace HomeworkTrackerServer {
 
             Dictionary<string, string> requestContent;
             status = 400;
-                    
-            try { requestContent = JsonConvert.DeserializeObject<Dictionary<string, string>>(reqText); }
-            catch (Exception) /* not valid request */ { return "Invalid Request, malformed JSON"; }
+
+            try {
+                requestContent = JsonConvert.DeserializeObject<Dictionary<string, string>>(reqText);
+            }
+            catch (Exception e) /* not valid request */ {
+                try {
+                    requestContent = JsonConvert.DeserializeObject<Dictionary<string, string>>(HttpUtility.UrlDecode(reqText));
+                }
+                catch (Exception) {
+                    return $"Invalid Request, malformed JSON: {e.Message}";
+                }
+            }
 
             if (requestContent == null)                     return "Invalid Request, request content is null";
             if (!requestContent.ContainsKey("requestType")) return "Invalid Request, your request must contain the 'requestType' property";
