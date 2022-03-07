@@ -1,6 +1,6 @@
 using System;
 
-namespace TodoApi
+namespace HomeworkTrackerServer
 {
     public class WeatherForecast
     {

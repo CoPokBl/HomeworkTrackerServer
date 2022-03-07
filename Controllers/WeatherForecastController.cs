@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace TodoApi.Controllers
+namespace HomeworkTrackerServer.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    // [Route("[controller]")]
+    [Route("/")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -35,5 +35,11 @@ namespace TodoApi.Controllers
             })
             .ToArray();
         }
+
+        [HttpPost]
+        public IActionResult Post() {
+            throw new Exception("e");
+        }
+
     }
 }
