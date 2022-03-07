@@ -1,13 +1,16 @@
 # HomeworkTrackerServer
 
 ## Why don't you use ASP.NET
-Yeah, I know that I could use ASP.NET. But I prefer making the whole API by myself so I did, I don't want the help of ASP.NETs builtin features.
+~~Yeah, I know that I could use ASP.NET. But I prefer making the whole API by myself so I did, I don't want the help of ASP.NETs builtin features.~~ Yeah okay I'm going to remake it in ASP.NET, I'm currently doing that in the v2 branch.
 
 ## So what is this?
 This is an API for tracking homework, I will be making clients that support this server so that you can save your homework and access it on multiple devices. 
 
 ## Contact me
 I prefer to use discord for communication, you can DM me at CoPokBl#9451
+
+## Hosting
+This version is currently live at *homeworktrack.serble.net:9898* and is running through a NGINX reverse proxy
 
 ## Clients
 Here is the current list of clients:
