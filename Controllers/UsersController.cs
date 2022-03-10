@@ -24,10 +24,15 @@ namespace HomeworkTrackerServer.Controllers {
             throw new NotImplementedException();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{username}")]
         // Deletes user
-        public async Task<ActionResult> DeleteUser(string id) {
+        public async Task<ActionResult> DeleteUser(string username) {
             
+            // auth 
+            
+            
+            // do it ig
+            Program.Storage.RemoveUser(username);
             return NoContent();
         }
         

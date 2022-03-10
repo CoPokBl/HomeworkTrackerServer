@@ -1,4 +1,5 @@
 using System;
+using HomeworkTrackerServer.Objects;
 using HomeworkTrackerServer.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -8,6 +9,7 @@ namespace HomeworkTrackerServer {
         
         public static int LoggingLevel = 3;
         public static IStorageMethod Storage;
+        public static TokenHandler TokenHandler;
         public static readonly Version Ver = new Version(0, 6, 3);
         public static void Main(string[] args) {
             try {

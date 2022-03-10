@@ -1,4 +1,5 @@
 using System;
+using HomeworkTrackerServer.Objects;
 using HomeworkTrackerServer.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,13 +9,16 @@ using Microsoft.Extensions.Hosting;
 
 namespace HomeworkTrackerServer {
     public class Startup {
-        public Startup(IConfiguration Config) {
-            Configuration = Config;
+        public Startup(IConfiguration config) {
+            Configuration = config;
 
-            Program.LoggingLevel = int.Parse(Config["LoggingLevel"]);
+            Program.LoggingLevel = int.Parse(config["LoggingLevel"]);
+            
+            // Init token handler
+            Program.TokenHandler = new TokenHandler(config);
 
             // Set storage method
-            switch (Config["StorageMethod"]) {
+            switch (config["StorageMethod"]) {
                 default:
                     Program.Error("Invalid StorageMethod value in config, must be MySQL or RAM");
                     throw new ArgumentException("Invalid StorageMethod value in config, must be MySQL or RAM");
@@ -31,7 +35,7 @@ namespace HomeworkTrackerServer {
 
             Program.Info("Initialising Storage");
             try {
-                Program.Storage.Init(Config);
+                Program.Storage.Init(config);
             }
             catch (Exception e) {
                 Program.Error("Failed to initialize storage: " + e.Message);
