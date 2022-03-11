@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace HomeworkTrackerServer.Storage {
     public class RamStorage : IStorageMethod {
-        private Dictionary<string, User> _users;                                            // Username, password
+        private Dictionary<string, User> _users;                                            // Id, password
         private Dictionary<string, List<Dictionary<string, string>>> _tasks;  // Username, list of tasks
         
         private static string Hash(string str) {
@@ -21,32 +21,37 @@ namespace HomeworkTrackerServer.Storage {
             return builder.ToString();
         }
 
-        public List<Dictionary<string, string>> GetTasks(string username) => 
-            !_tasks.ContainsKey(username) ? new List<Dictionary<string, string>>() : _tasks[username];
+        public List<Dictionary<string, string>> GetTasks(string id) => 
+            !_tasks.ContainsKey(id) ? new List<Dictionary<string, string>>() : _tasks[id];
 
-        public bool AuthUser(string username, string password) {
-            Program.Debug($"Authenticating user: {username}");
+        public bool AuthUser(string id, string password) {
+            Program.Debug($"Authenticating user: {id}");
             
-            if (!_users.ContainsKey(username)) {
-                Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist"); 
+            if (!_users.ContainsKey(id)) {
+                Program.Debug($"User failed Authentication with username '{id}' because that name doesn't exist"); 
                 return false;
             }
-            string correctPass = _users[username].Password;
+            string correctPass = _users[id].Password;
             if (Hash(password) == correctPass) {
-                Program.Debug($"User '{username}' succeeded authentication");
+                Program.Debug($"User '{id}' succeeded authentication");
                 return true;
             }
-            Program.Debug($"User failed Authentication with username '{username}' because the password is wrong");
+            Program.Debug($"User failed Authentication with username '{id}' because the password is wrong");
             return false;
 
         }
 
         public bool CreateUser(User user) {
-            if (_users.ContainsKey(user.Username)) {
+            if (_users.ContainsKey(user.Guid)) {
+                // somehow duplicate ID
+                // Change GUID
+                user.Guid = Guid.NewGuid().ToString();
+            }
+            if (_users.Any(kvp => kvp.Value.Username == user.Username)) {
                 Program.Debug($"Failed to create user {user.Username} because that name is taken");
                 return false;
             }
-            _users.Add(user.Username, user);
+            _users.Add(user.Guid, user);
             Program.Debug($"Created user {user.Username}");
             return true;
         }
