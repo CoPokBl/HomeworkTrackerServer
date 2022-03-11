@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
+using HomeworkTrackerServer.Objects;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
@@ -44,6 +45,25 @@ namespace HomeworkTrackerServer.Storage {
             cmd.Parameters.AddWithValue("@user", username);
             cmd.Parameters.AddWithValue("@value", newPassword);
             cmd.ExecuteNonQuery();
+        }
+
+        public User[] GetAllUsers() {
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users", _connection);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            List<User> users = new List<User>();
+            while (rdr.Read()) {
+                User usr = new User {
+                    Username = rdr.GetString("Username"),
+                    Password = rdr.GetString("Password"),
+                    CreationDate = long.Parse(rdr.GetString("creationDate")),
+                    Guid = rdr.GetString("id")
+                };
+                users.Add(usr);
+            }
+            rdr.Close();
+
+            return users.ToArray();
         }
 
         public List<Dictionary<string, string>> GetTasks(string username) {
@@ -100,9 +120,9 @@ namespace HomeworkTrackerServer.Storage {
 
         }
 
-        public bool CreateUser(string username, string password) {
+        public bool CreateUser(User user) {
             using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username = @user", _connection);
-            cmd.Parameters.AddWithValue("@user", username);
+            cmd.Parameters.AddWithValue("@user", user.Username);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             bool exists = false;
@@ -113,15 +133,17 @@ namespace HomeworkTrackerServer.Storage {
             rdr.Close();
             
             if (exists) {
-                Program.Debug($"Failed to create user {username} because that name is taken");
+                Program.Debug($"Failed to create user {user.Username} because that name is taken");
                 return false;
             }
             
-            using MySqlCommand cmd2 = new MySqlCommand("INSERT INTO hw_users (username, password) VALUES (@user, @pass)", _connection);
-            cmd2.Parameters.AddWithValue("@user", username);
-            cmd2.Parameters.AddWithValue("@pass", Hash(password));
+            using MySqlCommand cmd2 = new MySqlCommand(
+                "INSERT INTO hw_users (id, username, password, creationDate) VALUES (@id, @user, @pass, @creationDate)",
+                _connection);
+            cmd2.Parameters.AddWithValue("@user", user.Username);
+            cmd2.Parameters.AddWithValue("@pass", user.Password);
             cmd2.ExecuteNonQuery();
-            Program.Debug($"Created user {username}");
+            Program.Debug($"Created user {user.Username}");
             return true;
         }
 
@@ -230,7 +252,11 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         private void CreateTables() {
-            SendMySqlStatement(@"CREATE TABLE IF NOT EXISTS hw_users(username VARCHAR(255), password VARCHAR(64))");
+            SendMySqlStatement(@"CREATE TABLE IF NOT EXISTS hw_users(
+                                id VARCHAR(64),
+                                username VARCHAR(255), 
+                                password VARCHAR(64),
+                                creationDate VARCHAR(64))");
             SendMySqlStatement(@"CREATE TABLE IF NOT EXISTS hw_tasks(" +
                                "owner VARCHAR(255), " +
                                "class VARCHAR(255), " +

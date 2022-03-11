@@ -4,11 +4,12 @@ using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using HomeworkTrackerServer.Objects;
 using Microsoft.Extensions.Configuration;
 
 namespace HomeworkTrackerServer.Storage {
     public class RamStorage : IStorageMethod {
-        private Dictionary<string, string> _users;                            // Username, password
+        private Dictionary<string, User> _users;                                            // Username, password
         private Dictionary<string, List<Dictionary<string, string>>> _tasks;  // Username, list of tasks
         
         private static string Hash(string str) {
@@ -20,9 +21,8 @@ namespace HomeworkTrackerServer.Storage {
             return builder.ToString();
         }
 
-        public List<Dictionary<string, string>> GetTasks(string username) {
-            return !_tasks.ContainsKey(username) ? new List<Dictionary<string, string>>() : _tasks[username];
-        }
+        public List<Dictionary<string, string>> GetTasks(string username) => 
+            !_tasks.ContainsKey(username) ? new List<Dictionary<string, string>>() : _tasks[username];
 
         public bool AuthUser(string username, string password) {
             Program.Debug($"Authenticating user: {username}");
@@ -31,7 +31,7 @@ namespace HomeworkTrackerServer.Storage {
                 Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist"); 
                 return false;
             }
-            string correctPass = _users[username];
+            string correctPass = _users[username].Password;
             if (Hash(password) == correctPass) {
                 Program.Debug($"User '{username}' succeeded authentication");
                 return true;
@@ -41,19 +41,17 @@ namespace HomeworkTrackerServer.Storage {
 
         }
 
-        public bool CreateUser(string username, string password) {
-            if (_users.ContainsKey(username)) {
-                Program.Debug($"Failed to create user {username} because that name is taken");
+        public bool CreateUser(User user) {
+            if (_users.ContainsKey(user.Username)) {
+                Program.Debug($"Failed to create user {user.Username} because that name is taken");
                 return false;
             }
-            _users.Add(username, password);
-            Program.Debug($"Created user {username}");
+            _users.Add(user.Username, user);
+            Program.Debug($"Created user {user.Username}");
             return true;
         }
 
-        public void RemoveUser(string username) {
-            _users.Remove(username);
-        }
+        public void RemoveUser(string username) { _users.Remove(username); }
 
         public void AddTask(string username, Dictionary<string, string> values) {
             
@@ -121,16 +119,16 @@ namespace HomeworkTrackerServer.Storage {
             return edited;
         }
 
-        public string GetUserPassword(string username) {
-            return _users[username];
-        }
+        public string GetUserPassword(string username) => _users[username].Password;
 
         public void ChangePassword(string username, string newPassword) {
-            _users[username] = newPassword;
+            _users[username].Password = newPassword;
         }
 
+        public User[] GetAllUsers() => _users.Values.ToArray();
+
         public void Init(IConfiguration config) {
-            _users = new Dictionary<string, string>();
+            _users = new Dictionary<string, User>();
             _tasks = new Dictionary<string, List<Dictionary<string, string>>>();
         }
         

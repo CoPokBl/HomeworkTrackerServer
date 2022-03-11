@@ -13,14 +13,14 @@ namespace HomeworkTrackerServer.Objects {
             _config = config;
         }
         
-        public string GenerateToken(string username) {
+        public string GenerateToken(string id) {
             string mySecret = _config["TokenSecret"];
             SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new Claim[] {
-                    new Claim("username", username),
-                    new Claim("password", Program.Storage.GetUserPassword(username))
+                    new Claim("id", id),
+                    new Claim("password", Program.Storage.GetUserPassword(id))
                 }),
                 Expires = DateTime.UtcNow.AddHours(int.Parse(_config["TokenExpirationHours"])),
                 Issuer = _config["TokenIssuer"],
@@ -31,7 +31,7 @@ namespace HomeworkTrackerServer.Objects {
             return tokenHandler.WriteToken(token);
         }
         
-        public bool ValidateCurrentToken(string token, out string username) {
+        public bool ValidateCurrentToken(string token, out string id) {
             string mySecret = _config["TokenSecret"];
             SymmetricSecurityKey mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -47,18 +47,18 @@ namespace HomeworkTrackerServer.Objects {
                 }, out validToken);
             }
             catch {
-                username = null;
+                id = null;
                 return false;
             }
             JwtSecurityTokenHandler tokenHandler2 = new JwtSecurityTokenHandler();
             JwtSecurityToken securityToken = tokenHandler2.ReadToken(token) as JwtSecurityToken;
-            string user = null;
+            string oid = null;
             string pass = null;
             foreach (Claim claim in securityToken.Claims) {
                 switch (claim.Type) {
                     
-                    case "username":
-                        user = claim.Value;
+                    case "id":
+                        oid = claim.Value;
                         break;
                     
                     case "password":
@@ -67,12 +67,13 @@ namespace HomeworkTrackerServer.Objects {
                 }
             }
 
-            string correctPass = Program.Storage.GetUserPassword(user);
+            string correctPass = Program.Storage.GetUserPassword(oid);
             if (pass != correctPass) {
                 // wrong password hash in token
-                throw new Exception("Invalid password in token");
+                id = null;
+                return false;
             }
-            username = user;
+            id = oid;
             return true;
         }
         
