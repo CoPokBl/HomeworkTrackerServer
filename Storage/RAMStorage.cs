@@ -24,22 +24,30 @@ namespace HomeworkTrackerServer.Storage {
         public List<Dictionary<string, string>> GetTasks(string id) => 
             !_tasks.ContainsKey(id) ? new List<Dictionary<string, string>>() : _tasks[id];
 
-        public bool AuthUser(string id, string password) {
-            Program.Debug($"Authenticating user: {id}");
-            
-            if (!_users.ContainsKey(id)) {
-                Program.Debug($"User failed Authentication with username '{id}' because that name doesn't exist"); 
-                return false;
-            }
-            string correctPass = _users[id].Password;
-            if (Hash(password) == correctPass) {
-                Program.Debug($"User '{id}' succeeded authentication");
+        public bool AuthUser(string username, string password, out string id) {
+            Program.Debug($"Authenticating user: {username}");
+            id = null;
+
+            foreach (User usr in _users.Values) {
+                if (usr.Username != username) continue;
+                Program.Debug(usr.Password);
+                Program.Debug(Hash(password));
+                Program.Debug(Hash("a"));
+                if (usr.Password != Hash(password)) {
+                    Program.Debug($"User failed Authentication with username '{username}' because the password is wrong");
+                    return false;
+                }
+
+                id = usr.Guid;
+                Program.Debug($"User '{username}' succeeded authentication");
                 return true;
             }
-            Program.Debug($"User failed Authentication with username '{id}' because the password is wrong");
-            return false;
 
+            Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist");
+            return false;
         }
+
+        public bool AuthUser(string username, string password) => AuthUser(username, password, out _);
 
         public bool CreateUser(User user) {
             if (_users.ContainsKey(user.Guid)) {
@@ -84,7 +92,7 @@ namespace HomeworkTrackerServer.Storage {
             FromStr(classColour);
             FromStr(typeColour);
 
-            var outData = new Dictionary<string, string> {
+            Dictionary<string, string> outData = new Dictionary<string, string> {
                 { "class", classText },
                 { "classColour", classColour },
                 { "task", task },
@@ -126,11 +134,20 @@ namespace HomeworkTrackerServer.Storage {
 
         public string GetUserPassword(string username) => _users[username].Password;
 
-        public void ChangePassword(string username, string newPassword) {
-            _users[username].Password = newPassword;
+        public void ChangePassword(string id, string newPassword) {
+            _users[id].Password = Hash(newPassword);
+        }
+
+        public void ChangeUsername(string userId, string newUsername) {
+            _users[userId].Username = newUsername;
         }
 
         public User[] GetAllUsers() => _users.Values.ToArray();
+        public User GetUser(string userId) => _users[userId];
+        public string GetUserId(string username) {
+            return _users.Values.Where(usr => usr.Username == username).Select(usr => usr.Guid).FirstOrDefault();
+            // Not found
+        }
 
         public void Init(IConfiguration config) {
             _users = new Dictionary<string, User>();

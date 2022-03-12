@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -67,7 +68,14 @@ namespace HomeworkTrackerServer.Objects {
                 }
             }
 
-            string correctPass = Program.Storage.GetUserPassword(oid);
+            string correctPass;
+            try { correctPass = Program.Storage.GetUserPassword(oid); }
+            catch (KeyNotFoundException) {
+                // User doesn't exist
+                id = null;
+                return false;
+            }
+            
             if (pass != correctPass) {
                 // wrong password hash in token
                 id = null;

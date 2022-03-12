@@ -1,31 +1,59 @@
 using System;
 using System.Threading.Tasks;
 using HomeworkTrackerServer.Objects;
+using HomeworkTrackerServer.Objects.HeaderParams;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeworkTrackerServer.Controllers {
     
     [ApiController]
-    [Route("api/[controller]")]
-    public class UsersController : ControllerBase {
+    [Route("api/users")]
+    public class UsersController : ApiController {
         
         [HttpGet]
         // Gets list of users (only for server admins)
-        public async Task<ActionResult<User[]>> GetUsers() {
-            // auth
-            if (!Authentication.GetPermsFromToken(HttpContext).IsSysAdmin) {
-                // failed authentication
-                return Unauthorized();  // L, imagine failing authentication
-            }
+        public async Task<ActionResult> GetUser([FromQuery] string username) {
             
-            // Give it to them
-            return Program.Storage.GetAllUsers();
+            // auth
+            string id = Program.Storage.GetUserId(username);
+            if (id == null) {
+                // user doesn't exist
+                return NoContent();
+            }
+            Permissions perms = Authentication.GetPermsFromToken(HttpContext);
+            
+            // Good auth
+            if (perms != null && (perms.IsAuthed(id) || perms.IsSysAdmin)) return Ok(Program.Storage.GetUser(id));
+            
+            // Bad auth
+            HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
+            return Unauthorized();
 
         }
 
         [HttpPost]
         // Registers a new user
-        public async Task<ActionResult<User>> Register(ExternalUser externalUser) {
+        public async Task<IActionResult> Register([FromHeader] AuthorizationHeaderParams authorization) {
+
+            ExternalUser externalUser;
+            try {
+                if (authorization.GetAuthType() != "Basic") {
+                    // bad
+                    return BadRequest();
+                }
+
+                externalUser = new ExternalUser {
+                    Username = authorization.GetUsername(),
+                    Password = authorization.GetPassword()
+                };
+            }
+            catch (Exception ex) {
+                // Invalid something
+                Program.Debug(ex.ToString());
+                return BadRequest();
+            }
+            
             // do da thing
             User internalUser = new User(externalUser);
             if (!Program.Storage.CreateUser(internalUser)) {
@@ -34,19 +62,42 @@ namespace HomeworkTrackerServer.Controllers {
             }
             
             // It did it
-            return internalUser;
+            return CreatedAtAction(nameof(GetUser), new { id = internalUser.Guid }, internalUser);
         }
-        
+
         [HttpPatch("{id}")]
+        public async Task<ActionResult> ChangePassword(string id, [FromBody] JsonPatchDocument<ExternalUser> patchData) {
+            
+            // auth
+            Permissions perms = Authentication.GetPermsFromToken(HttpContext);
+            if (perms == null || !perms.IsAuthed(id)) {
+                HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
+                return Unauthorized();
+            }
+
+            User internalUser = Program.Storage.GetUser(id);
+            ExternalUser externalUser = internalUser.ToExternal();
+            try {
+                patchData.ApplyTo(externalUser);
+            }
+            catch (Exception) {
+                BadRequest();
+            }
+            // do it ig
+            Program.Storage.ChangeUsername(id, externalUser.Username);
+            Program.Storage.ChangePassword(id, externalUser.Password);
+            return Ok(externalUser);
+        }
 
         [HttpDelete("{id}")]
         // Deletes user
         public async Task<ActionResult> DeleteUser(string id) {
             
             // auth
-            if (!Authentication.GetPermsFromToken(HttpContext).IsAuthed(id)) {
-                // failed authentication
-                return Unauthorized();  // L, imagine failing authentication
+            Permissions perms = Authentication.GetPermsFromToken(HttpContext);
+            if (perms == null || !perms.IsAuthed(id)) {
+                HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
+                return Unauthorized();
             }
 
             // do it ig

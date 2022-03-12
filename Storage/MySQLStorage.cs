@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Security.Cryptography;
@@ -13,6 +14,7 @@ namespace HomeworkTrackerServer.Storage {
     public class MySQLStorage : IStorageMethod {
 
         private MySqlConnection _connection;  // MySQL Connection Object
+        private string _connectString;
 
 
         private static string Hash(string str) {
@@ -43,7 +45,15 @@ namespace HomeworkTrackerServer.Storage {
             using MySqlCommand cmd = new MySqlCommand(
                 "UPDATE hw_users SET password=@value WHERE id=@user", _connection);
             cmd.Parameters.AddWithValue("@user", id);
-            cmd.Parameters.AddWithValue("@value", newPassword);
+            cmd.Parameters.AddWithValue("@value", Hash(newPassword));
+            cmd.ExecuteNonQuery();
+        }
+        
+        public void ChangeUsername(string id, string newUsername) {
+            using MySqlCommand cmd = new MySqlCommand(
+                "UPDATE hw_users SET username=@value WHERE id=@user", _connection);
+            cmd.Parameters.AddWithValue("@user", id);
+            cmd.Parameters.AddWithValue("@value", newUsername);
             cmd.ExecuteNonQuery();
         }
 
@@ -64,6 +74,39 @@ namespace HomeworkTrackerServer.Storage {
             rdr.Close();
 
             return users.ToArray();
+        }
+
+        public User GetUser(string userId) {
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE id = @user", _connection);
+            cmd.Parameters.AddWithValue("@user", userId);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            User userObj = new User();
+            while (rdr.Read()) {
+                userObj = new User {
+                    Guid = rdr.GetString("id"),
+                    CreationDate = long.Parse(rdr.GetString("CreationDate")),
+                    Password = rdr.GetString("Password"),
+                    Username = rdr.GetString("Username")
+                };
+                break;
+            }
+            rdr.Close();
+
+            return userObj;
+        }
+
+        public string GetUserId(string username) {
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username=@user", _connection);
+            cmd.Parameters.AddWithValue("@user", username);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read()) rdr.Close(); return rdr.GetString("id");
+#pragma warning disable CS0162
+            rdr.Close();
+
+            return null;
+#pragma warning restore CS0162
         }
 
         public List<Dictionary<string, string>> GetTasks(string id) {
@@ -90,34 +133,40 @@ namespace HomeworkTrackerServer.Storage {
             return tasks;
         }
 
-        public bool AuthUser(string id, string password) {
+        public bool AuthUser(string username, string password, out string id) {
             
-            Program.Debug($"Authenticating user: {id}");
+            Program.Debug($"Authenticating user: {username}");
             
-            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE id = @user", _connection);
-            cmd.Parameters.AddWithValue("@user", id);
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username=@user", _connection);
+            cmd.Parameters.AddWithValue("@user", username);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             string correctPass = null;
             bool exists = false;
+            id = null;
             while (rdr.Read()) {
                 correctPass = rdr.GetString("password") ?? "";
+                id = rdr.GetString("id");
                 exists = true;
                 break;
             }
             rdr.Close();
             
             if (!exists) {
-                Program.Debug($"User failed Authentication with username '{id}' because that id doesn't exist"); 
+                Program.Debug($"User failed Authentication with username '{username}' because that id doesn't exist");
                 return false;
             }
             if (Hash(password) == correctPass) {
-                Program.Debug($"User '{id}' succeeded authentication");
+                Program.Debug($"User '{username}' succeeded authentication");
                 return true;
             }
-            Program.Debug($"User failed Authentication with username '{id}' because the password is wrong");
+            Program.Debug($"User failed Authentication with username '{username}' because the password is wrong");
             return false;
 
+        }
+
+        public bool AuthUser(string username, string password) {
+            return AuthUser(username, password, out _);
         }
 
         public bool CreateUser(User user) {
@@ -141,7 +190,7 @@ namespace HomeworkTrackerServer.Storage {
                 "INSERT INTO hw_users (id, username, password, creationDate) VALUES (@id, @user, @pass, @creationDate)",
                 _connection);
             cmd2.Parameters.AddWithValue("@user", user.Username);
-            cmd2.Parameters.AddWithValue("@pass", user.Password);
+            cmd2.Parameters.AddWithValue("@pass", Hash(user.Password));
             cmd2.ExecuteNonQuery();
             Program.Debug($"Created user {user.Username}");
             return true;
@@ -176,7 +225,7 @@ namespace HomeworkTrackerServer.Storage {
             FromStr(classColour);
             FromStr(typeColour);
 
-            var outData = new Dictionary<string, string> {
+            Dictionary<string, string> outData = new Dictionary<string, string> {
                 { "class", classText },
                 { "classColour", classColour },
                 { "task", task },
@@ -223,13 +272,13 @@ namespace HomeworkTrackerServer.Storage {
 
         public void Init(IConfiguration config) {
             Program.Info("Connecting to MySQL...");
-            string cs = $"server={config["mysql_ip"]};" +
-                        $"userid={config["mysql_user"]};" +
-                        $"password={config["mysql_password"]};" +
-                        $"database={config["mysql_database"]}";
+            _connectString = $"server={config["mysql_ip"]};" +
+                             $"userid={config["mysql_user"]};" +
+                             $"password={config["mysql_password"]};" +
+                             $"database={config["mysql_database"]}";
 
             try {
-                _connection = new MySqlConnection(cs);
+                _connection = new MySqlConnection(_connectString);
                 _connection.Open();
             }
             catch (Exception e) {
@@ -237,6 +286,7 @@ namespace HomeworkTrackerServer.Storage {
                 throw new Exception("Failed to connect to MySQL");
             }
             Program.Info("Connected MySQL");
+            _connection.StateChange += DatabaseConnectStateChanged;
             Program.Debug($"MySQL Version: {_connection.ServerVersion}");
             Program.Info("Creating tables in MySQL...");
             CreateTables();
@@ -273,6 +323,21 @@ namespace HomeworkTrackerServer.Storage {
             cmd.Connection = _connection;
             cmd.CommandText = statement;
             cmd.ExecuteNonQuery();
+        }
+
+        private void DatabaseConnectStateChanged(object obj, StateChangeEventArgs args) {
+            if (args.CurrentState != ConnectionState.Broken && args.CurrentState != ConnectionState.Closed) return;
+            
+            // Reconnect
+            try {
+                _connection = new MySqlConnection(_connectString);
+                _connection.Open();
+            }
+            catch (Exception e) {
+                Program.Error("MySQL reconnect failed: " + e);
+                _connection.StateChange -= DatabaseConnectStateChanged;  // Don't loop connect
+                throw new Exception("Failed to reconnect to MySQL");
+            }
         }
 
     }

@@ -21,7 +21,14 @@ namespace HomeworkTrackerServer.Objects {
             CreationDate = DateTime.Now.ToBinary();
             Guid = System.Guid.NewGuid().ToString();
         }
-        
+
+        public ExternalUser ToExternal() {
+            return new ExternalUser {
+                Username = Username,
+                Password = Password
+            };
+        }
+
     }
     
     public class ExternalUser {

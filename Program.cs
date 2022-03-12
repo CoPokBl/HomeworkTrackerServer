@@ -11,6 +11,7 @@ namespace HomeworkTrackerServer {
         public static IStorageMethod Storage;
         public static TokenHandler TokenHandler;
         public static readonly Version Ver = new Version(0, 6, 3);
+        public const string WwwAuthHeader = "Bearer realm=\"HomeworkAccounts\"";
         public static void Main(string[] args) {
             try {
                 CreateHostBuilder(args).Build().Run();

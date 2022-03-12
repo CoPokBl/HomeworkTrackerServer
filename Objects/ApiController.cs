@@ -6,7 +6,9 @@ namespace HomeworkTrackerServer.Objects {
         public override void OnActionExecuting(ActionExecutingContext context) {
             base.OnActionExecuting(context);
             // Happens every request:
-            Program.Debug($"New request from: {context.HttpContext.Request}");
+            Program.Debug(context.HttpContext.Request.Headers.Keys.Contains("User-Agent")
+                ? $"New request from: {context.HttpContext.Request.Headers["User-Agent"]}"
+                : $"New request from unknown user agent");
         }
     }
 }

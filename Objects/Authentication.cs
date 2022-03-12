@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Primitives;
@@ -19,7 +20,7 @@ namespace HomeworkTrackerServer.Objects {
                 content.Request.Headers.Where(head => head.Key == "Authorization");
             List<string> validIds = new List<string>();
 
-            var authHeaderPairs = authHeaders.ToArray();
+            KeyValuePair<string, StringValues>[] authHeaderPairs = authHeaders.ToArray();
 
             foreach (KeyValuePair<string, StringValues> authHeaderPair in authHeaderPairs) {
 
@@ -37,6 +38,7 @@ namespace HomeworkTrackerServer.Objects {
                     continue;
                 }
 
+                
                 if (Program.TokenHandler.ValidateCurrentToken(sections[1], out string id)) {
                     // successful token validation
                     validIds.Add(id);
