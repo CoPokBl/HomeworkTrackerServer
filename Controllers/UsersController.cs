@@ -1,12 +1,13 @@
 using System;
 using System.Threading.Tasks;
 using HomeworkTrackerServer.Objects;
+using HomeworkTrackerServer.Objects.ControllerClasses;
 using HomeworkTrackerServer.Objects.HeaderParams;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeworkTrackerServer.Controllers {
-    
+
     [ApiController]
     [Route("api/users")]
     public class UsersController : ApiController {

@@ -203,41 +203,27 @@ namespace HomeworkTrackerServer.Storage {
             Program.Debug($"Removed User: {id}");
         }
 
-        public void AddTask(string id, Dictionary<string, string> values) {
+        public bool AddTask(string userId, Dictionary<string, string> values, out string id) {
             
-            Program.Debug("Adding task for " + id);
+            Program.Debug("Adding task for " + userId);
+            id = null;
 
-            string classText = "None";
-            string classColour = "-1.-1.-1";
-            string task = "None";
-            string typeText = "None";
-            string typeColour = "-1.-1.-1";
-            long dueDate = 0;
-
-            if (values.ContainsKey("class")) { classText = values["class"]; }
-            if (values.ContainsKey("classColour")) { classColour = values["classColour"]; }
-            if (values.ContainsKey("task")) { task = values["task"]; }
-            if (values.ContainsKey("type")) { typeText = values["type"]; }
-            if (values.ContainsKey("typeColour")) { typeColour = values["typeColour"]; }
-            if (values.ContainsKey("dueDate")) 
-                if (long.Parse(values["dueDate"]) != 0) { dueDate = DateTime.FromBinary(long.Parse(values["dueDate"])).ToBinary(); }
-
-            FromStr(classColour);
-            FromStr(typeColour);
+            bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task, true);
+            if (!success) { return false; }  // Invalid
 
             Dictionary<string, string> outData = new Dictionary<string, string> {
-                { "class", classText },
-                { "classColour", classColour },
-                { "task", task },
-                { "type", typeText },
-                { "typeColour", typeColour },
-                { "dueDate", dueDate.ToString() },
-                { "id", Guid.NewGuid().ToString() }
+                { "class", task.Class },
+                { "classColour", task.ClassColour },
+                { "task", task.Task },
+                { "type", task.Type },
+                { "typeColour", task.TypeColour },
+                { "dueDate", task.DueDate.ToString() },
+                { "id", task.Id }
             };
             using MySqlCommand cmd2 = new MySqlCommand(
                 "INSERT INTO hw_tasks (owner, class, classColour, task, ttype, typeColour, dueDate, id) " +
                 "VALUES (@user, @class, @cc, @task, @ttype, @tc, @due, @id)", _connection);
-            cmd2.Parameters.AddWithValue("@user", id);
+            cmd2.Parameters.AddWithValue("@user", userId);
             cmd2.Parameters.AddWithValue("@class", outData["class"]);
             cmd2.Parameters.AddWithValue("@cc", outData["classColour"]);
             cmd2.Parameters.AddWithValue("@task", outData["task"]);
@@ -246,7 +232,10 @@ namespace HomeworkTrackerServer.Storage {
             cmd2.Parameters.AddWithValue("@due", outData["dueDate"]);
             cmd2.Parameters.AddWithValue("@id", outData["id"]);
             cmd2.ExecuteNonQuery();
+            return true;
         }
+        
+        public bool AddTask(string username, Dictionary<string, string> values) => AddTask(username, values, out _);
 
         public bool RemoveTask(string userId /* This is needed for RAMManager because of the way it is setup */, string id) {
             using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_tasks WHERE id=@id", _connection);
@@ -308,7 +297,7 @@ namespace HomeworkTrackerServer.Storage {
                                 password VARCHAR(64),
                                 creationDate VARCHAR(64))");
             SendMySqlStatement(@"CREATE TABLE IF NOT EXISTS hw_tasks(" +
-                               "owner VARCHAR(255), " +
+                               "owner VARCHAR(64), " +
                                "class VARCHAR(255), " +
                                "classColour VARCHAR(11), " +
                                "task VARCHAR(255), " +

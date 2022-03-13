@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace HomeworkTrackerServer.Objects {
     
-    public class Authentication {
+    public static class Authentication {
     
     	// for get perms functions null return means that the token is invalid
 
@@ -18,7 +18,6 @@ namespace HomeworkTrackerServer.Objects {
             // Get all instances of the Auth header
             IEnumerable<KeyValuePair<string, StringValues>> authHeaders = 
                 content.Request.Headers.Where(head => head.Key == "Authorization");
-            List<string> validIds = new List<string>();
 
             KeyValuePair<string, StringValues>[] authHeaderPairs = authHeaders.ToArray();
 
@@ -41,14 +40,14 @@ namespace HomeworkTrackerServer.Objects {
                 
                 if (Program.TokenHandler.ValidateCurrentToken(sections[1], out string id)) {
                     // successful token validation
-                    validIds.Add(id);
+                    return new Permissions(id);  // Only 1 auth header is allowed
                 }
                 // invalid token
                 // it will ignore
             }
 
 	        // If no names validated then return null, otherwise return the permissions object
-            return validIds.Count == 0 ? null : new Permissions(validIds.ToArray());
+            return null;
         }
 
         private static Permissions GetPermsFromToken(string token) => 
@@ -57,31 +56,21 @@ namespace HomeworkTrackerServer.Objects {
     }
 
     public class Permissions {
-        public bool IsSysAdmin;
-        public readonly string[] Ids;  // Now ids
+        public readonly bool IsSysAdmin;
+        public readonly string Id;  // Now ids
 
         public Permissions(string userId) {
-            Ids = new [] { userId };
-            IsSysAdmin = false;
-        }
-        
-        public Permissions(string[] userIds) {
-            Ids = userIds;
+            Id = userId;
             IsSysAdmin = false;
         }
         
         public Permissions(string userId, bool isSysAdmin) {
-            Ids = new [] { userId };
+            Id = userId;
             IsSysAdmin = isSysAdmin;
         }
-        
-        public Permissions(string[] userIds, bool isSysAdmin) {
-            Ids = userIds;
-            IsSysAdmin = isSysAdmin;
-        }
-        
+
         // Just for ease of access
-        public bool IsAuthed(string id) => Ids.Contains(id);
+        public bool IsAuthed(string id) => Id == id;
 
     }
     

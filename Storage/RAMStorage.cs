@@ -66,44 +66,32 @@ namespace HomeworkTrackerServer.Storage {
 
         public void RemoveUser(string username) { _users.Remove(username); }
 
-        public void AddTask(string username, Dictionary<string, string> values) {
+        public bool AddTask(string username, Dictionary<string, string> values, out string id) {
             
             Program.Debug("Adding task for " + username);
+            id = null;
             
-            if (!_tasks.ContainsKey(username)) {
-                _tasks.Add(username, new List<Dictionary<string, string>>());
-            }
-
-            string classText = "None";
-            string classColour = "-1.-1.-1";
-            string task = "None";
-            string typeText = "None";
-            string typeColour = "-1.-1.-1";
-            long dueDate = 0;
-
-            if (values.ContainsKey("class")) { classText = values["class"]; }
-            if (values.ContainsKey("classColour")) { classColour = values["classColour"]; }
-            if (values.ContainsKey("task")) { task = values["task"]; }
-            if (values.ContainsKey("type")) { typeText = values["type"]; }
-            if (values.ContainsKey("typeColour")) { typeColour = values["typeColour"]; }
-            if (values.ContainsKey("dueDate")) 
-                if (long.Parse(values["dueDate"]) != 0) { dueDate = DateTime.FromBinary(long.Parse(values["dueDate"])).ToBinary(); }
-
-            FromStr(classColour);
-            FromStr(typeColour);
+            if (!_tasks.ContainsKey(username)) { _tasks.Add(username, new List<Dictionary<string, string>>()); }
+            
+            bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task, true);
+            if (!success) { return false; }  // Invalid
 
             Dictionary<string, string> outData = new Dictionary<string, string> {
-                { "class", classText },
-                { "classColour", classColour },
-                { "task", task },
-                { "type", typeText },
-                { "typeColour", typeColour },
-                { "dueDate", dueDate.ToString() },
-                { "id", Guid.NewGuid().ToString() }
+                { "class", task.Class },
+                { "classColour", task.ClassColour },
+                { "task", task.Task },
+                { "type", task.Type },
+                { "typeColour", task.TypeColour },
+                { "dueDate", task.DueDate.ToString() },
+                { "id", task.Id }
             };
-            
+
+            id = task.Id;
             _tasks[username].Add(outData);
+            return true;
         }
+
+        public bool AddTask(string username, Dictionary<string, string> values) => AddTask(username, values, out _);
 
         public bool RemoveTask(string username, string id) {
             bool removed = false;
@@ -122,7 +110,7 @@ namespace HomeworkTrackerServer.Storage {
             bool edited = false;
             foreach (Dictionary<string, string> task in _tasks[username].Where(task => task["id"] == id)) {
                 // Validate values for non string fields
-                if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
+                if (field == "classColour" || field == "typeColour") { Converter.ColorFromString(newValue); }
                 if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
                 task[field] = newValue;  // This will throw if the field is invalid
                 edited = true;
@@ -154,13 +142,6 @@ namespace HomeworkTrackerServer.Storage {
             _tasks = new Dictionary<string, List<Dictionary<string, string>>>();
         }
         
-        private static Color FromStr(string str) {
-            if (str == "-1.-1.-1") {
-                return Color.Empty;
-            }
-            string[] strs = str.Split(".");
-            return Color.FromArgb(255, Convert.ToInt32(strs[0]), Convert.ToInt32(strs[1]), Convert.ToInt32(strs[2]));
-        }
         
     }
 }
