@@ -5,6 +5,7 @@ using HomeworkTrackerServer.Objects.ControllerClasses;
 using HomeworkTrackerServer.Objects.HeaderParams;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Controllers {
 
@@ -51,7 +52,7 @@ namespace HomeworkTrackerServer.Controllers {
             }
             catch (Exception ex) {
                 // Invalid something
-                Program.Debug(ex.ToString());
+                Logger.Debug(ex.ToString());
                 return BadRequest();
             }
             

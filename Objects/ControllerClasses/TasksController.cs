@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Objects.ControllerClasses {
     
@@ -8,7 +9,7 @@ namespace HomeworkTrackerServer.Objects.ControllerClasses {
         public override void OnActionExecuting(ActionExecutingContext context) {
             base.OnActionExecuting(context);
             // Happens every request:
-            Program.Debug(context.HttpContext.Request.Headers.Keys.Contains("User-Agent")
+            Logger.Debug(context.HttpContext.Request.Headers.Keys.Contains("User-Agent")
                 ? $"New request from: {context.HttpContext.Request.Headers["User-Agent"]}"
                 : $"New request from unknown user agent");
             

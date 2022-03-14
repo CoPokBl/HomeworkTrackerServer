@@ -8,6 +8,7 @@ using System.Text;
 using HomeworkTrackerServer.Objects;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Storage {
     
@@ -109,6 +110,41 @@ namespace HomeworkTrackerServer.Storage {
 #pragma warning restore CS0162
         }
 
+        public HomeworkTask GetTask(string taskId) {
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE id=@id", _connection);
+            cmd.Parameters.AddWithValue("@id", taskId);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read()) rdr.Close(); return new HomeworkTask {
+                Id = rdr.GetString("id"),
+                Class = rdr.GetString("class"),
+                ClassColour = rdr.GetString("classColour"),
+                Type = rdr.GetString("ttype"),
+                TypeColour = rdr.GetString("typeColour"),
+                Task = rdr.GetString("task"),
+                DueDate = long.Parse(rdr.GetString("dueDate")),
+                Owner = rdr.GetString("owner")
+            };
+#pragma warning disable CS0162
+            rdr.Close();
+
+            return null;
+#pragma warning restore CS0162
+        }
+
+        public string GetOwnerOfTask(string taskId) {
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE id=@id", _connection);
+            cmd.Parameters.AddWithValue("@id", taskId);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read()) rdr.Close(); return rdr.GetString("owner");
+#pragma warning disable CS0162
+            rdr.Close();
+
+            return null;
+#pragma warning restore CS0162
+        }
+
         public List<Dictionary<string, string>> GetTasks(string id) {
             
             using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE owner=@user", _connection);
@@ -135,7 +171,7 @@ namespace HomeworkTrackerServer.Storage {
 
         public bool AuthUser(string username, string password, out string id) {
             
-            Program.Debug($"Authenticating user: {username}");
+            Logger.Debug($"Authenticating user: {username}");
             
             using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username=@user", _connection);
             cmd.Parameters.AddWithValue("@user", username);
@@ -153,14 +189,14 @@ namespace HomeworkTrackerServer.Storage {
             rdr.Close();
             
             if (!exists) {
-                Program.Debug($"User failed Authentication with username '{username}' because that id doesn't exist");
+                Logger.Debug($"User failed Authentication with username '{username}' because that id doesn't exist");
                 return false;
             }
             if (Hash(password) == correctPass) {
-                Program.Debug($"User '{username}' succeeded authentication");
+                Logger.Debug($"User '{username}' succeeded authentication");
                 return true;
             }
-            Program.Debug($"User failed Authentication with username '{username}' because the password is wrong");
+            Logger.Debug($"User failed Authentication with username '{username}' because the password is wrong");
             return false;
 
         }
@@ -182,7 +218,7 @@ namespace HomeworkTrackerServer.Storage {
             rdr.Close();
             
             if (exists) {
-                Program.Debug($"Failed to create user {user.Username} because that name is taken");
+                Logger.Debug($"Failed to create user {user.Username} because that name is taken");
                 return false;
             }
             
@@ -192,7 +228,7 @@ namespace HomeworkTrackerServer.Storage {
             cmd2.Parameters.AddWithValue("@user", user.Username);
             cmd2.Parameters.AddWithValue("@pass", Hash(user.Password));
             cmd2.ExecuteNonQuery();
-            Program.Debug($"Created user {user.Username}");
+            Logger.Debug($"Created user {user.Username}");
             return true;
         }
 
@@ -200,12 +236,12 @@ namespace HomeworkTrackerServer.Storage {
             using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_users WHERE id=@user", _connection);
             cmd2.Parameters.AddWithValue("@user", id);
             cmd2.ExecuteNonQuery();
-            Program.Debug($"Removed User: {id}");
+            Logger.Debug($"Removed User: {id}");
         }
 
         public bool AddTask(string userId, Dictionary<string, string> values, out string id) {
             
-            Program.Debug("Adding task for " + userId);
+            Logger.Debug("Adding task for " + userId);
             id = null;
 
             bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task, true);
@@ -241,7 +277,7 @@ namespace HomeworkTrackerServer.Storage {
             using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_tasks WHERE id=@id", _connection);
             cmd2.Parameters.AddWithValue("@id", id);
             cmd2.ExecuteNonQuery();
-            Program.Debug($"Removed: {id} from {userId}'s tasks");
+            Logger.Debug($"Removed: {id} from {userId}'s tasks");
             return true;
         }
         
@@ -255,12 +291,12 @@ namespace HomeworkTrackerServer.Storage {
             cmd2.Parameters.AddWithValue("@value", newValue);
             cmd2.Parameters.AddWithValue("@id", id);
             cmd2.ExecuteNonQuery();
-            Program.Debug($"Edited {id} from {userId}'s tasks");
+            Logger.Debug($"Edited {id} from {userId}'s tasks");
             return true;
         }
 
         public void Init(IConfiguration config) {
-            Program.Info("Connecting to MySQL...");
+            Logger.Info("Connecting to MySQL...");
             _connectString = $"server={config["mysql_ip"]};" +
                              $"userid={config["mysql_user"]};" +
                              $"password={config["mysql_password"]};" +
@@ -271,15 +307,15 @@ namespace HomeworkTrackerServer.Storage {
                 _connection.Open();
             }
             catch (Exception e) {
-                Program.Debug(e.ToString());
+                Logger.Debug(e.ToString());
                 throw new Exception("Failed to connect to MySQL");
             }
-            Program.Info("Connected MySQL");
+            Logger.Info("Connected MySQL");
             _connection.StateChange += DatabaseConnectStateChanged;
-            Program.Debug($"MySQL Version: {_connection.ServerVersion}");
-            Program.Info("Creating tables in MySQL...");
+            Logger.Debug($"MySQL Version: {_connection.ServerVersion}");
+            Logger.Info("Creating tables in MySQL...");
             CreateTables();
-            Program.Info("Created MySQL tables");
+            Logger.Info("Created MySQL tables");
         }
         
         private static Color FromStr(string str) {
@@ -323,7 +359,7 @@ namespace HomeworkTrackerServer.Storage {
                 _connection.Open();
             }
             catch (Exception e) {
-                Program.Error("MySQL reconnect failed: " + e);
+                Logger.Error("MySQL reconnect failed: " + e);
                 _connection.StateChange -= DatabaseConnectStateChanged;  // Don't loop connect
                 throw new Exception("Failed to reconnect to MySQL");
             }

@@ -6,13 +6,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RayKeys.Misc;
 
 namespace HomeworkTrackerServer {
     public class Startup {
         public Startup(IConfiguration config) {
             Configuration = config;
 
-            Program.LoggingLevel = int.Parse(config["LoggingLevel"]);
+            Program.LoggingLevel = (LogLevel) int.Parse(config["LoggingLevel"]);
+            Logger.Init(Program.LoggingLevel);
             
             // Init token handler
             Program.TokenHandler = new TokenHandler(config);
@@ -20,7 +22,7 @@ namespace HomeworkTrackerServer {
             // Set storage method
             switch (config["StorageMethod"]) {
                 default:
-                    Program.Error("Invalid StorageMethod value in config, must be MySQL or RAM");
+                    Logger.Error("Invalid StorageMethod value in config, must be MySQL or RAM");
                     throw new ArgumentException("Invalid StorageMethod value in config, must be MySQL or RAM");
                 
                 case "MySQL":
@@ -28,23 +30,23 @@ namespace HomeworkTrackerServer {
                     break;
                 
                 case "RAM":
-                    Program.Info("Warning: StorageMethod is set to RAM, data will be deleted upon restart");
+                    Logger.Info("Warning: StorageMethod is set to RAM, data will be deleted upon restart");
                     Program.Storage = new RamStorage();
                     break;
             }
 
-            Program.Info("Initialising Storage");
+            Logger.Info("Initialising Storage");
             try {
                 Program.Storage.Init(config);
             }
             catch (Exception e) {
-                Program.Error("Failed to initialize storage: " + e.Message);
-                Program.Debug(e.ToString());  // Debug whole error
+                Logger.Error("Failed to initialize storage: " + e.Message);
+                Logger.Debug(e.ToString());  // Debug whole error
                 throw new Exception("Failed to init storage");
             }
-            Program.Info("Initialised Storage");
+            Logger.Info("Initialised Storage");
             
-            Program.Debug("Finished startup");
+            Logger.Debug("Finished startup");
         }
 
         public IConfiguration Configuration { get; }

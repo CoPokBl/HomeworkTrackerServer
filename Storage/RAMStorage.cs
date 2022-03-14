@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using HomeworkTrackerServer.Objects;
 using Microsoft.Extensions.Configuration;
+using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Storage {
     public class RamStorage : IStorageMethod {
@@ -25,25 +26,25 @@ namespace HomeworkTrackerServer.Storage {
             !_tasks.ContainsKey(id) ? new List<Dictionary<string, string>>() : _tasks[id];
 
         public bool AuthUser(string username, string password, out string id) {
-            Program.Debug($"Authenticating user: {username}");
+            Logger.Debug($"Authenticating user: {username}");
             id = null;
 
             foreach (User usr in _users.Values) {
                 if (usr.Username != username) continue;
-                Program.Debug(usr.Password);
-                Program.Debug(Hash(password));
-                Program.Debug(Hash("a"));
+                Logger.Debug(usr.Password);
+                Logger.Debug(Hash(password));
+                Logger.Debug(Hash("a"));
                 if (usr.Password != Hash(password)) {
-                    Program.Debug($"User failed Authentication with username '{username}' because the password is wrong");
+                    Logger.Debug($"User failed Authentication with username '{username}' because the password is wrong");
                     return false;
                 }
 
                 id = usr.Guid;
-                Program.Debug($"User '{username}' succeeded authentication");
+                Logger.Debug($"User '{username}' succeeded authentication");
                 return true;
             }
 
-            Program.Debug($"User failed Authentication with username '{username}' because that name doesn't exist");
+            Logger.Debug($"User failed Authentication with username '{username}' because that name doesn't exist");
             return false;
         }
 
@@ -56,11 +57,11 @@ namespace HomeworkTrackerServer.Storage {
                 user.Guid = Guid.NewGuid().ToString();
             }
             if (_users.Any(kvp => kvp.Value.Username == user.Username)) {
-                Program.Debug($"Failed to create user {user.Username} because that name is taken");
+                Logger.Debug($"Failed to create user {user.Username} because that name is taken");
                 return false;
             }
             _users.Add(user.Guid, user);
-            Program.Debug($"Created user {user.Username}");
+            Logger.Debug($"Created user {user.Username}");
             return true;
         }
 
@@ -68,7 +69,7 @@ namespace HomeworkTrackerServer.Storage {
 
         public bool AddTask(string username, Dictionary<string, string> values, out string id) {
             
-            Program.Debug("Adding task for " + username);
+            Logger.Debug("Adding task for " + username);
             id = null;
             
             if (!_tasks.ContainsKey(username)) { _tasks.Add(username, new List<Dictionary<string, string>>()); }
@@ -97,7 +98,7 @@ namespace HomeworkTrackerServer.Storage {
             bool removed = false;
             foreach (Dictionary<string, string> task in _tasks[username].Where(task => task["id"] == id)) {
                 _tasks[username].Remove(task);
-                Program.Debug($"Removed one of {username}'s tasks");
+                Logger.Debug($"Removed one of {username}'s tasks");
                 removed = true;
                 break;  // If there were multiple then something is wrong so who cares
                 // I'd rather it be more efficient that add more error logging
@@ -135,6 +136,27 @@ namespace HomeworkTrackerServer.Storage {
         public string GetUserId(string username) {
             return _users.Values.Where(usr => usr.Username == username).Select(usr => usr.Guid).FirstOrDefault();
             // Not found
+        }
+
+        public HomeworkTask GetTask(string taskId) {
+            return (from usersTasks in _tasks
+            from task in usersTasks.Value.Where(task => task["id"] == taskId)
+            select new HomeworkTask {
+                Owner = usersTasks.Key,
+                Class = task["class"],
+                ClassColour = task["classColour"],
+                Type = task["type"],
+                TypeColour = task["typeColour"],
+                Task = task["task"],
+                DueDate = long.Parse(task["dueDate"]),
+                Id = task["id"]
+            }).FirstOrDefault();
+        }
+
+        public string GetOwnerOfTask(string taskId) {
+            return (from usersTasks in _tasks
+                from task in usersTasks.Value.Where(task => task["id"] == taskId)
+                select usersTasks.Key).FirstOrDefault();
         }
 
         public void Init(IConfiguration config) {

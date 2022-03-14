@@ -21,6 +21,8 @@ namespace HomeworkTrackerServer.Storage {
         public User[] GetAllUsers();
         public User GetUser(string userId);
         public string GetUserId(string username);
+        public HomeworkTask GetTask(string taskId);
+        public string GetOwnerOfTask(string taskId);
 
         public void Init(IConfiguration config);
     }

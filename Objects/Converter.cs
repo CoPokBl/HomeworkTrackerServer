@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace HomeworkTrackerServer.Objects {
     
-    public class Converter {
+    public static class Converter {
         
         public static string Base64Encode(string plainText) =>
             System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(plainText));
