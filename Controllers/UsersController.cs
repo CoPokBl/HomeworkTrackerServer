@@ -52,7 +52,7 @@ namespace HomeworkTrackerServer.Controllers {
             }
             catch (Exception ex) {
                 // Invalid something
-                Logger.Debug(ex.ToString());
+                // Logger.Debug(authorization.Authorization);
                 return BadRequest();
             }
             
