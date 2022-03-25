@@ -11,7 +11,7 @@ namespace HomeworkTrackerServer {
         public static LogLevel LoggingLevel = LogLevel.Debug;
         public static IStorageMethod Storage;
         public static TokenHandler TokenHandler;
-        public static readonly Version Ver = new Version(0, 7, 0);
+        public static readonly Version Ver = new Version(0, 8, 0);
         public const string WwwAuthHeader = "Bearer realm=\"HomeworkAccounts\"";
         public static void Main(string[] args) {
             try {

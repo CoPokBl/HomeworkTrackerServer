@@ -256,6 +256,34 @@ namespace HomeworkTrackerServer.Storage {
                 { "dueDate", task.DueDate.ToString() },
                 { "id", task.Id }
             };
+            
+            // check mysql database for duplicate id
+            using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE id=@id", _connection);
+            cmd.Parameters.AddWithValue("@id", task.Id);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+            bool exists = false;
+            while (rdr.Read()) {
+                exists = true;
+                break;
+            }
+            rdr.Close();
+            if (exists) {
+                // replace it
+                using MySqlCommand replaceCmd = new MySqlCommand(
+                    "UPDATE hw_tasks SET class=@class, classColour=@classColour, task=@task, type=@type, typeColour=@typeColour, dueDate=@dueDate WHERE id=@id",
+                    _connection);
+                replaceCmd.Parameters.AddWithValue("@class", task.Class);
+                replaceCmd.Parameters.AddWithValue("@classColour", task.ClassColour);
+                replaceCmd.Parameters.AddWithValue("@task", task.Task);
+                replaceCmd.Parameters.AddWithValue("@type", task.Type);
+                replaceCmd.Parameters.AddWithValue("@typeColour", task.TypeColour);
+                replaceCmd.Parameters.AddWithValue("@dueDate", task.DueDate.ToString());
+                replaceCmd.Parameters.AddWithValue("@id", task.Id);
+                replaceCmd.ExecuteNonQuery();
+                Logger.Debug($"Replaced task {task.Id}");
+                return true;
+            }
+            
             using MySqlCommand cmd2 = new MySqlCommand(
                 "INSERT INTO hw_tasks (owner, class, classColour, task, ttype, typeColour, dueDate, id) " +
                 "VALUES (@user, @class, @cc, @task, @ttype, @tc, @due, @id)", _connection);

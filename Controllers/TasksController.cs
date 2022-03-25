@@ -4,6 +4,7 @@ using HomeworkTrackerServer.Objects;
 using HomeworkTrackerServer.Objects.ControllerClasses;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Controllers {
     
@@ -22,9 +23,9 @@ namespace HomeworkTrackerServer.Controllers {
 
         }
 
-        [HttpPost]
+        [HttpPut]
         public ActionResult AddTask(Dictionary<string, string> task) {
-            
+
             // Auth
             Permissions perms = Authentication.GetPermsFromToken(HttpContext);
             if (perms == null) {
@@ -34,15 +35,15 @@ namespace HomeworkTrackerServer.Controllers {
             
             if (task == null) { return BadRequest(); }
 
-            if (!Program.Storage.AddTask(perms.Id, task, out string taskId)) {
+            if (!Program.Storage.AddTask(perms.Id, task, out string id)) {
                 // Failed
                 // Invalid args
                 return BadRequest();
             }
-            
+
             Converter.DictionaryToHomeworkTask(task, out HomeworkTask obj, true);
             obj.Owner = perms.Id;
-            return Ok(obj);
+            return CreatedAtAction(nameof(GetTasks), id, obj);
 
         }
         
@@ -96,7 +97,7 @@ namespace HomeworkTrackerServer.Controllers {
             HomeworkTask obj = Program.Storage.GetTask(id);
             obj.Owner = perms.Id;
             obj.Id = internalTask.Id;
-            return CreatedAtAction(nameof(GetTasks), id, obj);
+            return Ok();
 
         }
 

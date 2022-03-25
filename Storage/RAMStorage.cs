@@ -88,6 +88,12 @@ namespace HomeworkTrackerServer.Storage {
             };
 
             id = task.Id;
+            if (_tasks[username].Any(t => t["id"] == task.Id)) {
+                // replace
+                int index = _tasks[username].FindIndex(t => t["id"] == task.Id);
+                _tasks[username][index] = outData;
+            }
+            
             _tasks[username].Add(outData);
             return true;
         }
