@@ -244,7 +244,7 @@ namespace HomeworkTrackerServer.Storage {
             Logger.Debug("Adding task for " + userId);
             id = null;
 
-            bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task, true);
+            bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task);
             if (!success) { return false; }  // Invalid
 
             Dictionary<string, string> outData = new Dictionary<string, string> {

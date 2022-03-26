@@ -74,7 +74,7 @@ namespace HomeworkTrackerServer.Storage {
             
             if (!_tasks.ContainsKey(username)) { _tasks.Add(username, new List<Dictionary<string, string>>()); }
             
-            bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task, true);
+            bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task);
             if (!success) { return false; }  // Invalid
 
             Dictionary<string, string> outData = new Dictionary<string, string> {
