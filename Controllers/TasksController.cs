@@ -22,6 +22,21 @@ namespace HomeworkTrackerServer.Controllers {
             return Unauthorized();  // Kick em out
 
         }
+        
+        [HttpGet("{id}")]
+        public ActionResult GetSpecificTask(string id) {
+            
+            Logger.Debug("Looking for task with id: " + id);
+            
+            // Auth
+            Permissions perms = Authentication.GetPermsFromToken(HttpContext);
+            if (perms == null) {
+                HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
+                return Unauthorized();  // Kick em out
+            }
+
+            return Ok(Program.Storage.GetTask(id));
+        }
 
         [HttpPut]
         public ActionResult AddTask(Dictionary<string, string> task) {

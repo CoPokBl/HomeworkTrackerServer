@@ -144,8 +144,8 @@ namespace HomeworkTrackerServer.Storage {
             // Not found
         }
 
-        public HomeworkTask GetTask(string taskId) {
-            return (from usersTasks in _tasks
+        public HomeworkTask GetTask(string taskId) => 
+            (from usersTasks in _tasks
             from task in usersTasks.Value.Where(task => task["id"] == taskId)
             select new HomeworkTask {
                 Owner = usersTasks.Key,
@@ -157,7 +157,7 @@ namespace HomeworkTrackerServer.Storage {
                 DueDate = long.Parse(task["dueDate"]),
                 Id = task["id"]
             }).FirstOrDefault();
-        }
+        
 
         public string GetOwnerOfTask(string taskId) {
             return (from usersTasks in _tasks

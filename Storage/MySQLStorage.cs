@@ -115,16 +115,19 @@ namespace HomeworkTrackerServer.Storage {
             cmd.Parameters.AddWithValue("@id", taskId);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
-            while (rdr.Read()) rdr.Close(); return new HomeworkTask {
-                Id = rdr.GetString("id"),
-                Class = rdr.GetString("class"),
-                ClassColour = rdr.GetString("classColour"),
-                Type = rdr.GetString("ttype"),
-                TypeColour = rdr.GetString("typeColour"),
-                Task = rdr.GetString("task"),
-                DueDate = long.Parse(rdr.GetString("dueDate")),
-                Owner = rdr.GetString("owner")
-            };
+            HomeworkTask task = new HomeworkTask();
+            while (rdr.Read()) {
+                task.Id = rdr.GetString("id");
+                task.Class = rdr.GetString("class");
+                task.ClassColour = rdr.GetString("classColour");
+                task.Type = rdr.GetString("ttype");
+                task.TypeColour = rdr.GetString("typeColour");
+                task.Task = rdr.GetString("task");
+                task.DueDate = long.Parse(rdr.GetString("dueDate"));
+                task.Owner = rdr.GetString("owner");
+                rdr.Close();
+                return task;
+            }
 #pragma warning disable CS0162
             rdr.Close();
 
@@ -171,7 +174,7 @@ namespace HomeworkTrackerServer.Storage {
 
         public bool AuthUser(string username, string password, out string id) {
             
-            Logger.Debug($"Authenticating user: {username}");
+            Logger.Debug($"\nAuthenticating user: {username}");
             
             using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username=@user", _connection);
             cmd.Parameters.AddWithValue("@user", username);
@@ -189,14 +192,16 @@ namespace HomeworkTrackerServer.Storage {
             rdr.Close();
             
             if (!exists) {
-                Logger.Debug($"User failed Authentication with username '{username}' because that id doesn't exist");
+                Logger.Debug($"User failed Authentication with username '{username}' because that id doesn't exist\n");
                 return false;
             }
+            Logger.Debug("User exists, checking password, correct pass: " + correctPass);
+            Logger.Debug($"Provided Password: {password}, Hash: {Hash(password)}");
             if (Hash(password) == correctPass) {
-                Logger.Debug($"User '{username}' succeeded authentication");
+                Logger.Debug($"User '{username}' succeeded authentication\n");
                 return true;
             }
-            Logger.Debug($"User failed Authentication with username '{username}' because the password is wrong");
+            Logger.Debug($"User failed Authentication with username '{username}' because the password is wrong\n");
             return false;
 
         }
@@ -225,8 +230,10 @@ namespace HomeworkTrackerServer.Storage {
             using MySqlCommand cmd2 = new MySqlCommand(
                 "INSERT INTO hw_users (id, username, password, creationDate) VALUES (@id, @user, @pass, @creationDate)",
                 _connection);
+            cmd2.Parameters.AddWithValue("@id", user.Guid);
             cmd2.Parameters.AddWithValue("@user", user.Username);
-            cmd2.Parameters.AddWithValue("@pass", Hash(user.Password));
+            cmd2.Parameters.AddWithValue("@pass", user.Password);
+            cmd2.Parameters.AddWithValue("@creationDate", user.CreationDate.ToString());
             cmd2.ExecuteNonQuery();
             Logger.Debug($"Created user {user.Username}");
             return true;
@@ -270,7 +277,7 @@ namespace HomeworkTrackerServer.Storage {
             if (exists) {
                 // replace it
                 using MySqlCommand replaceCmd = new MySqlCommand(
-                    "UPDATE hw_tasks SET class=@class, classColour=@classColour, task=@task, type=@type, typeColour=@typeColour, dueDate=@dueDate WHERE id=@id",
+                    "UPDATE hw_tasks SET class=@class, classColour=@classColour, task=@task, ttype=@type, typeColour=@typeColour, dueDate=@dueDate WHERE id=@id",
                     _connection);
                 replaceCmd.Parameters.AddWithValue("@class", task.Class);
                 replaceCmd.Parameters.AddWithValue("@classColour", task.ClassColour);
