@@ -1,4 +1,4 @@
-# HomeworkTrackerServer
+# HomeworkTrackerServer [OLD - This branch is now depreciated]
 
 ## Why don't you use ASP.NET
 ~~Yeah, I know that I could use ASP.NET. But I prefer making the whole API by myself so I did, I don't want the help of ASP.NETs builtin features.~~ Yeah okay I'm going to remake it in ASP.NET, I'm currently doing that in the v2 branch.
