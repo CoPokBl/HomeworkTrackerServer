@@ -102,12 +102,14 @@ namespace HomeworkTrackerServer.Storage {
             cmd.Parameters.AddWithValue("@user", username);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
-            while (rdr.Read()) rdr.Close(); return rdr.GetString("id");
-#pragma warning disable CS0162
-            rdr.Close();
-
-            return null;
-#pragma warning restore CS0162
+            string id = null;
+            while (rdr.Read()) {
+                id = rdr.GetString("id");
+                rdr.Close();
+                break;
+            }
+            return id;
+            
         }
 
         public HomeworkTask GetTask(string taskId) {
