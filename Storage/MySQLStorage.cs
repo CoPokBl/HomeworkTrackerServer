@@ -142,6 +142,7 @@ namespace HomeworkTrackerServer.Storage {
             while (rdr.Read()) {
                 owner = rdr.GetString("owner");
                 rdr.Close();
+                break;
             }
             return owner;
         }
