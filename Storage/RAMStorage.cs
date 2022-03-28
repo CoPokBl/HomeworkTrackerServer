@@ -130,7 +130,7 @@ namespace HomeworkTrackerServer.Storage {
         public string GetUserPassword(string username) => _users[username].Password;
 
         public void ChangePassword(string id, string newPassword) {
-            _users[id].Password = Hash(newPassword);
+            _users[id].Password = newPassword;
         }
 
         public void ChangeUsername(string userId, string newUsername) {

@@ -1,4 +1,6 @@
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using HomeworkTrackerServer.Objects;
 using HomeworkTrackerServer.Objects.ControllerClasses;
@@ -79,15 +81,24 @@ namespace HomeworkTrackerServer.Controllers {
 
             User internalUser = Program.Storage.GetUser(id);
             ExternalUser externalUser = internalUser.ToExternal();
+            string originalPassword = externalUser.Password;
             try {
                 patchData.ApplyTo(externalUser);
             }
             catch (Exception) {
                 BadRequest();
             }
+
+            if (originalPassword != externalUser.Password) {
+                StringBuilder builder = new StringBuilder();
+                foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(externalUser.Password))) {
+                    builder.Append(t.ToString("x2"));
+                }
+                externalUser.Password = builder.ToString();
+                Program.Storage.ChangePassword(id, externalUser.Password);
+            }
             // do it ig
             Program.Storage.ChangeUsername(id, externalUser.Username);
-            Program.Storage.ChangePassword(id, externalUser.Password);
             return Ok(externalUser);
         }
 

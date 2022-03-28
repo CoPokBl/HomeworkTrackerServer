@@ -46,7 +46,7 @@ namespace HomeworkTrackerServer.Storage {
             using MySqlCommand cmd = new MySqlCommand(
                 "UPDATE hw_users SET password=@value WHERE id=@user", _connection);
             cmd.Parameters.AddWithValue("@user", id);
-            cmd.Parameters.AddWithValue("@value", Hash(newPassword));
+            cmd.Parameters.AddWithValue("@value", newPassword);
             cmd.ExecuteNonQuery();
         }
         
