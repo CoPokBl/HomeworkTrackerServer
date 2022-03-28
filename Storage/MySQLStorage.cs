@@ -130,7 +130,6 @@ namespace HomeworkTrackerServer.Storage {
             }
 #pragma warning disable CS0162
             rdr.Close();
-
             return null;
 #pragma warning restore CS0162
         }
@@ -139,13 +138,12 @@ namespace HomeworkTrackerServer.Storage {
             using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE id=@id", _connection);
             cmd.Parameters.AddWithValue("@id", taskId);
             using MySqlDataReader rdr = cmd.ExecuteReader();
-
-            while (rdr.Read()) rdr.Close(); return rdr.GetString("owner");
-#pragma warning disable CS0162
-            rdr.Close();
-
-            return null;
-#pragma warning restore CS0162
+            string owner = null;
+            while (rdr.Read()) {
+                owner = rdr.GetString("owner");
+                rdr.Close();
+            }
+            return owner;
         }
 
         public List<Dictionary<string, string>> GetTasks(string id) {
