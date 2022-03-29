@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,6 +83,7 @@ namespace HomeworkTrackerServer.Controllers {
             User internalUser = Program.Storage.GetUser(id);
             ExternalUser externalUser = internalUser.ToExternal();
             string originalPassword = externalUser.Password;
+            string originalUsername = externalUser.Username;
             try {
                 patchData.ApplyTo(externalUser);
             }
@@ -89,6 +91,7 @@ namespace HomeworkTrackerServer.Controllers {
                 BadRequest();
             }
 
+            // do it ig
             if (originalPassword != externalUser.Password) {
                 StringBuilder builder = new StringBuilder();
                 foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(externalUser.Password))) {
@@ -97,8 +100,15 @@ namespace HomeworkTrackerServer.Controllers {
                 externalUser.Password = builder.ToString();
                 Program.Storage.ChangePassword(id, externalUser.Password);
             }
-            // do it ig
-            Program.Storage.ChangeUsername(id, externalUser.Username);
+
+            if (originalUsername != externalUser.Username) {
+                // check to make sure the username isn't taken
+                if (Program.Storage.GetUserId(externalUser.Username) != null) {
+                    return Conflict("Username taken");
+                }
+                Program.Storage.ChangeUsername(id, externalUser.Username);
+            }
+            
             return Ok(externalUser);
         }
 
@@ -111,6 +121,12 @@ namespace HomeworkTrackerServer.Controllers {
             if (perms == null || !perms.IsAuthed(id)) {
                 HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
                 return Unauthorized();
+            }
+            
+            // remove all of that users tasks
+            List<Dictionary<string, string>> tasks = Program.Storage.GetTasks(id);
+            foreach (Dictionary<string, string> task in tasks) {
+                Program.Storage.RemoveTask(id, task["id"]);
             }
 
             // do it ig

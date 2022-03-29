@@ -4,6 +4,7 @@ using HomeworkTrackerServer.Objects;
 using HomeworkTrackerServer.Objects.ControllerClasses;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Controllers {
@@ -50,6 +51,12 @@ namespace HomeworkTrackerServer.Controllers {
             
             if (task == null) { return BadRequest(); }
 
+            // Make sure all fields in task are less than 255 characters
+            foreach (KeyValuePair<string, string> kvp in task) {
+                if (kvp.Key.Length > 255) { return BadRequest("Fields cannot be more than 255 characters"); }
+                if (kvp.Value.Length > 255) { return BadRequest("Fields cannot be more than 255 characters"); }
+            }
+            
             if (!Program.Storage.AddTask(perms.Id, task, out string id)) {
                 // Failed
                 // Invalid args
@@ -75,7 +82,7 @@ namespace HomeworkTrackerServer.Controllers {
             string taskOwner = Program.Storage.GetOwnerOfTask(id);
             if (taskOwner == null) { return NotFound(); }
             if (taskOwner != perms.Id) { return Forbid(); }
-            
+
             HomeworkTask internalTask = Program.Storage.GetTask(id);
             ExternalHomeworkTask externalTask = internalTask.ToExternal();
             try {
@@ -83,6 +90,13 @@ namespace HomeworkTrackerServer.Controllers {
             }
             catch (Exception) {
                 BadRequest();
+            }
+            
+            // make sure all fields in externalTask are less than 255 characters
+            foreach (KeyValuePair<string, string> kvp in 
+                     JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(externalTask))) {
+                if (kvp.Key.Length > 255) { return BadRequest("Fields cannot be more than 255 characters"); }
+                if (kvp.Value.Length > 255) { return BadRequest("Fields cannot be more than 255 characters"); }
             }
 
             try {
