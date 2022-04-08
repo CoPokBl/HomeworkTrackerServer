@@ -44,5 +44,5 @@ Q: OMG I FOUND A BUG, what do I do?
 Q: How do I suggest stuff?  
 *A: Open an issue in the issues tab in GitHub.*
 
-Q: How do I use the API?
+Q: How do I use the API?  
 *A: Check out the [wiki](https://github.com/CoPokBl/HomeworkTrackerServer/wiki)*
