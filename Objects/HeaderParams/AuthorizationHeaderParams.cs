@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeworkTrackerServer.Objects.HeaderParams {
     public class AuthorizationHeaderParams {
         
-        [FromHeader] 
-        public string Authorization { get; set; }
+        [FromHeader]
+        private string Authorization { get; set; }
 
         public string GetUsername() {
             string[] data = Authorization.Split(' ');

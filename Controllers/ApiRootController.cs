@@ -13,6 +13,12 @@ namespace HomeworkTrackerServer.Controllers {
             return Ok($"Homework Tracker API, made by CoPokBl using ASP.NET. Version {Program.Ver}.");
         }
         
+        [HttpOptions]
+        public IActionResult Options() {
+            HttpContext.Response.Headers.Add("Allow", "GET,OPTIONS");
+            return Ok();
+        }
+        
     }
     
 }

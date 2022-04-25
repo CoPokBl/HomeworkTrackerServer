@@ -12,8 +12,13 @@ namespace HomeworkTrackerServer.Controllers {
         [HttpGet]
         public async Task<ActionResult> GetPage() {
             // Give it to them
-            return Ok("Woooooo");
-
+            return Ok("HomeworkTrackerServer");
+        }
+        
+        [HttpOptions]
+        public IActionResult Options() {
+            HttpContext.Response.Headers.Add("Allow", "GET,OPTIONS");
+            return Ok();
         }
         
     }

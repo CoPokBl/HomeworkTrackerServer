@@ -27,9 +27,8 @@ namespace HomeworkTrackerServer.Controllers {
                     Password = authorization.GetPassword()
                 };
             }
-            catch (Exception ex) {
+            catch (Exception) {
                 // Invalid something
-                Logger.Debug(ex.ToString());
                 return BadRequest();
             }
 
@@ -40,5 +39,12 @@ namespace HomeworkTrackerServer.Controllers {
             // do thing
             return Ok(Program.TokenHandler.GenerateToken(id));
         }
+        
+        [HttpOptions]
+        public IActionResult Options() {
+            HttpContext.Response.Headers.Add("Allow", "GET,OPTIONS");
+            return Ok();
+        }
+        
     }
 }
