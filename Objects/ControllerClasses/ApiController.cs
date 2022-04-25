@@ -7,6 +7,9 @@ namespace HomeworkTrackerServer.Objects.ControllerClasses {
     public class ApiController : Controller {
         public override void OnActionExecuting(ActionExecutingContext context) {
             
+            // Allow connections from all origins
+            HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            
             // get ip address
             IPAddress ip = Request.HttpContext.Connection.RemoteIpAddress;
             string ipStr = ip.ToString();
