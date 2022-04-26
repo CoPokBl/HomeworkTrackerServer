@@ -4,7 +4,7 @@ namespace HomeworkTrackerServer.Objects.HeaderParams {
     public class AuthorizationHeaderParams {
         
         [FromHeader]
-        public string Authorization { get; set; }
+        public string Authorization { get; set; }  // DO NOT SET TO PRIVATE IT BREAKS THE [FromHeader] ATTRIBUTE
 
         public string GetUsername() {
             string[] data = Authorization.Split(' ');
