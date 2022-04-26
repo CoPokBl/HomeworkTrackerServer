@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Primitives;
 using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Objects.ControllerClasses {
@@ -13,6 +15,13 @@ namespace HomeworkTrackerServer.Objects.ControllerClasses {
             HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE,TRACE,CONNECT");
             HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "*");
 
+            // debug headers
+            if (Program.Debug) {
+                foreach (KeyValuePair<string, StringValues> header in HttpContext.Request.Headers) {
+                    Logger.Debug("Header | " + header.Key + ": " + header.Value);
+                }
+            }
+            
             // get ip address
             IPAddress ip = Request.HttpContext.Connection.RemoteIpAddress;
             string ipStr = ip.ToString();
