@@ -29,7 +29,7 @@ namespace HomeworkTrackerServer.Controllers {
             }
             catch (Exception e) {
                 // Invalid something
-                return BadRequest("Invalid authorization header: " + e.Message);
+                return BadRequest(Program.Debug ? "Invalid authorization header: " + e : "Invalid authorization header: " + e.Message);
             }
 
             if (!Program.Storage.AuthUser(externalUser.Username, externalUser.Password, out string id)) {
