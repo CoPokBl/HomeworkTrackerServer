@@ -9,7 +9,10 @@ namespace HomeworkTrackerServer.Objects.ControllerClasses {
             
             // Allow connections from all origins
             HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-            
+            HttpContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+            HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE,TRACE,CONNECT");
+            HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "*");
+
             // get ip address
             IPAddress ip = Request.HttpContext.Connection.RemoteIpAddress;
             string ipStr = ip.ToString();
