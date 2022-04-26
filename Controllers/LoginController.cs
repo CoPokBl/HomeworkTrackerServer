@@ -19,7 +19,7 @@ namespace HomeworkTrackerServer.Controllers {
             try {
                 if (authorization.GetAuthType() != "Basic") {
                     // bad
-                    return BadRequest();
+                    return BadRequest("Invalid authorization type (It must be Basic)");
                 }
 
                 externalUser = new ExternalUser {
@@ -27,9 +27,9 @@ namespace HomeworkTrackerServer.Controllers {
                     Password = authorization.GetPassword()
                 };
             }
-            catch (Exception) {
+            catch (Exception e) {
                 // Invalid something
-                return BadRequest();
+                return BadRequest("Invalid authorization header: " + e.Message);
             }
 
             if (!Program.Storage.AuthUser(externalUser.Username, externalUser.Password, out string id)) {
