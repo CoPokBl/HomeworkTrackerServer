@@ -14,6 +14,14 @@ namespace HomeworkTrackerServer.Controllers {
         [HttpGet]
         // Login
         public IActionResult Login([FromHeader] AuthorizationHeaderParams authorization) {
+
+            if (authorization == null) {
+                return BadRequest("Authorization is missing");
+            }
+
+            if (Program.Debug) {
+                Logger.Debug("Authorization: " + authorization);
+            }
             
             ExternalUser externalUser;
             try {

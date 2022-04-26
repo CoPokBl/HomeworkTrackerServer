@@ -18,5 +18,6 @@ namespace HomeworkTrackerServer.Objects.HeaderParams {
         
         public string GetAuthType() => Authorization.Split(' ')[0];
 
+        public override string ToString() => Authorization;
     }
 }
