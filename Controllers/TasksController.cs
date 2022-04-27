@@ -153,6 +153,12 @@ namespace HomeworkTrackerServer.Controllers {
             return Ok();
         }
         
+        [HttpOptions("{id}")]
+        public IActionResult OptionsPerTask() {
+            HttpContext.Response.Headers.Add("Allow", "GET,PATCH,DELETE,OPTIONS");
+            return Ok();
+        }
+        
     }
     
 }
