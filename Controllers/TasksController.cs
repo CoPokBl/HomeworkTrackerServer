@@ -49,7 +49,7 @@ namespace HomeworkTrackerServer.Controllers {
                 return Unauthorized();  // Kick em out
             }
             
-            if (task == null) { return BadRequest(); }
+            if (task == null) { return BadRequest("You must provide the task in JSON form"); }
 
             // Make sure all fields in task are less than 255 characters
             foreach (KeyValuePair<string, string> kvp in task) {
@@ -60,7 +60,7 @@ namespace HomeworkTrackerServer.Controllers {
             if (!Program.Storage.AddTask(perms.Id, task, out string id)) {
                 // Failed
                 // Invalid args
-                return BadRequest();
+                return BadRequest("Failed to add task, rejected by storage");
             }
 
             Converter.DictionaryToHomeworkTask(task, out HomeworkTask obj, true);
@@ -89,7 +89,7 @@ namespace HomeworkTrackerServer.Controllers {
                 patchData.ApplyTo(externalTask);
             }
             catch (Exception) {
-                BadRequest();
+                BadRequest("Failed to apply patch, invalid patch data");
             }
             
             // make sure all fields in externalTask are less than 255 characters
@@ -120,7 +120,7 @@ namespace HomeworkTrackerServer.Controllers {
             catch (Exception) {
                 // Failed to edit
                 // Invalid values
-                return BadRequest();
+                return BadRequest("Failed to edit task, rejected by storage");
             }
 
             HomeworkTask obj = Program.Storage.GetTask(id);
