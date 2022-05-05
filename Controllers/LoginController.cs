@@ -45,7 +45,7 @@ namespace HomeworkTrackerServer.Controllers {
             }
 
             // do thing
-            return Ok(Program.TokenHandler.GenerateToken(id));
+            return Ok(TokenHandler.GenerateToken(id));
         }
         
         [HttpOptions]

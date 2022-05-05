@@ -3,37 +3,31 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HomeworkTrackerServer.Objects {
-    public class TokenHandler {
-        private readonly IConfiguration _config;
+    public static class TokenHandler {
 
-        public TokenHandler(IConfiguration config) {
-            _config = config;
-        }
-        
-        public string GenerateToken(string id) {
-            string mySecret = _config["TokenSecret"];
+        public static string GenerateToken(string id) {
+            string mySecret = Program.Config["TokenSecret"];
             SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor {
-                Subject = new ClaimsIdentity(new Claim[] {
+                Subject = new ClaimsIdentity(new[] {
                     new Claim("id", id),
                     new Claim("password", Program.Storage.GetUserPassword(id))
                 }),
-                Expires = DateTime.UtcNow.AddHours(int.Parse(_config["TokenExpirationHours"])),
-                Issuer = _config["TokenIssuer"],
-                Audience = _config["TokenAudience"],
+                Expires = DateTime.UtcNow.AddHours(int.Parse(Program.Config["TokenExpirationHours"])),
+                Issuer = Program.Config["TokenIssuer"],
+                Audience = Program.Config["TokenAudience"],
                 SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature),
             };
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
         
-        public bool ValidateCurrentToken(string token, out string id) {
-            string mySecret = _config["TokenSecret"];
+        public static bool ValidateCurrentToken(string token, out string id) {
+            string mySecret = Program.Config["TokenSecret"];
             SymmetricSecurityKey mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken validToken;
@@ -42,8 +36,8 @@ namespace HomeworkTrackerServer.Objects {
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidIssuer = _config["TokenIssuer"],
-                    ValidAudience = _config["TokenAudience"],
+                    ValidIssuer = Program.Config["TokenIssuer"],
+                    ValidAudience = Program.Config["TokenAudience"],
                     IssuerSigningKey = mySecurityKey
                 }, out validToken);
             }

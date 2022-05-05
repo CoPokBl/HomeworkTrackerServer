@@ -1,5 +1,5 @@
 using System;
-using HomeworkTrackerServer.Objects;
+using System.Collections.Generic;
 using HomeworkTrackerServer.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -10,10 +10,11 @@ namespace HomeworkTrackerServer {
         
         public static LogLevel LoggingLevel = LogLevel.Debug;
         public static IStorageMethod Storage;
-        public static TokenHandler TokenHandler;
         public static readonly Version Ver = new Version(0, 8, 0);
         public const string WwwAuthHeader = "Bearer realm=\"HomeworkAccounts\"";
         public static bool Debug;
+        public static Dictionary<string, string> Config;
+        
         public static void Main(string[] args) {
             
             // Debug option
@@ -29,6 +30,13 @@ namespace HomeworkTrackerServer {
                 Logger.Debug(e.ToString());
             }
             Logger.Info("Exiting");
+            try {
+                Storage.Deinit();
+            }
+            catch (Exception e) {
+                Logger.Error("Storage deinit failed: " + e.Message);
+                Logger.Debug(e.ToString());
+            }
             Logger.WaitFlush();
         }
 

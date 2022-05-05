@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Objects {
     

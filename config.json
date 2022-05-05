@@ -1,0 +1,14 @@
+{
+  "mysql_ip": "mysql.example.net",
+  "mysql_user": "admin",
+  "mysql_password": "",
+  "mysql_database": "homeworktracker",
+
+  "LoggingLevel": "3",
+  "StorageMethod": "RAM",
+
+  "TokenSecret": "Changing this will invalidate all tokens, make it unique so that it can't be cracked!",
+  "TokenExpirationHours": "168",
+  "TokenIssuer": "HomeworkTracker",
+  "TokenAudience": "HomeworkTrackerUsers"
+}

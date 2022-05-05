@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using HomeworkTrackerServer.Objects;
 using HomeworkTrackerServer.Objects.ControllerClasses;
 using Microsoft.AspNetCore.Mvc;
 

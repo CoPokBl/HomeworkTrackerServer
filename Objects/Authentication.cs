@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Primitives;
@@ -38,7 +37,7 @@ namespace HomeworkTrackerServer.Objects {
                 }
 
                 
-                if (Program.TokenHandler.ValidateCurrentToken(sections[1], out string id)) {
+                if (TokenHandler.ValidateCurrentToken(sections[1], out string id)) {
                     // successful token validation
                     return new Permissions(id);  // Only 1 auth header is allowed
                 }
@@ -51,7 +50,7 @@ namespace HomeworkTrackerServer.Objects {
         }
 
         private static Permissions GetPermsFromToken(string token) => 
-            Program.TokenHandler.ValidateCurrentToken(token, out string username) ? new Permissions(username) : null;
+            TokenHandler.ValidateCurrentToken(token, out string username) ? new Permissions(username) : null;
 
     }
 

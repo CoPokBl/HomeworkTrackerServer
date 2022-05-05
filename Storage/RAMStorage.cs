@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using HomeworkTrackerServer.Objects;
-using Microsoft.Extensions.Configuration;
 using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Storage {
     public class RamStorage : IStorageMethod {
-        private Dictionary<string, User> _users;                                            // Id, password
-        private Dictionary<string, List<Dictionary<string, string>>> _tasks;  // Username, list of tasks
+        protected Dictionary<string, User> Users;                                            // Id, password
+        protected Dictionary<string, List<Dictionary<string, string>>> Tasks;  // Username, list of tasks
         
         private static string Hash(string str) {
             StringBuilder builder = new StringBuilder();  
@@ -23,13 +21,13 @@ namespace HomeworkTrackerServer.Storage {
         }
 
         public List<Dictionary<string, string>> GetTasks(string id) => 
-            !_tasks.ContainsKey(id) ? new List<Dictionary<string, string>>() : _tasks[id];
+            !Tasks.ContainsKey(id) ? new List<Dictionary<string, string>>() : Tasks[id];
 
         public bool AuthUser(string username, string password, out string id) {
             Logger.Debug($"Authenticating user: {username}");
             id = null;
 
-            foreach (User usr in _users.Values) {
+            foreach (User usr in Users.Values) {
                 if (usr.Username != username) continue;
                 Logger.Debug(usr.Password);
                 Logger.Debug(Hash(password));
@@ -51,28 +49,28 @@ namespace HomeworkTrackerServer.Storage {
         public bool AuthUser(string username, string password) => AuthUser(username, password, out _);
 
         public bool CreateUser(User user) {
-            if (_users.ContainsKey(user.Guid)) {
+            if (Users.ContainsKey(user.Guid)) {
                 // somehow duplicate ID
                 // Change GUID
                 user.Guid = Guid.NewGuid().ToString();
             }
-            if (_users.Any(kvp => kvp.Value.Username == user.Username)) {
+            if (Users.Any(kvp => kvp.Value.Username == user.Username)) {
                 Logger.Debug($"Failed to create user {user.Username} because that name is taken");
                 return false;
             }
-            _users.Add(user.Guid, user);
+            Users.Add(user.Guid, user);
             Logger.Debug($"Created user {user.Username}");
             return true;
         }
 
-        public void RemoveUser(string username) { _users.Remove(username); }
+        public void RemoveUser(string username) { Users.Remove(username); }
 
         public bool AddTask(string username, Dictionary<string, string> values, out string id) {
             
             Logger.Debug("Adding task for " + username);
             id = null;
             
-            if (!_tasks.ContainsKey(username)) { _tasks.Add(username, new List<Dictionary<string, string>>()); }
+            if (!Tasks.ContainsKey(username)) { Tasks.Add(username, new List<Dictionary<string, string>>()); }
             
             bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task);
             if (!success) { return false; }  // Invalid
@@ -88,13 +86,13 @@ namespace HomeworkTrackerServer.Storage {
             };
 
             id = task.Id;
-            if (_tasks[username].Any(t => t["id"] == task.Id)) {
+            if (Tasks[username].Any(t => t["id"] == task.Id)) {
                 // replace
-                int index = _tasks[username].FindIndex(t => t["id"] == task.Id);
-                _tasks[username][index] = outData;
+                int index = Tasks[username].FindIndex(t => t["id"] == task.Id);
+                Tasks[username][index] = outData;
             }
             
-            _tasks[username].Add(outData);
+            Tasks[username].Add(outData);
             return true;
         }
 
@@ -102,8 +100,8 @@ namespace HomeworkTrackerServer.Storage {
 
         public bool RemoveTask(string username, string id) {
             bool removed = false;
-            foreach (Dictionary<string, string> task in _tasks[username].Where(task => task["id"] == id)) {
-                _tasks[username].Remove(task);
+            foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
+                Tasks[username].Remove(task);
                 Logger.Debug($"Removed one of {username}'s tasks");
                 removed = true;
                 break;  // If there were multiple then something is wrong so who cares
@@ -115,7 +113,7 @@ namespace HomeworkTrackerServer.Storage {
         public bool EditTask(string username, string id, string field, string newValue) {
             if (field == "id") { throw new Exception("The field 'id' cannot be edited"); }
             bool edited = false;
-            foreach (Dictionary<string, string> task in _tasks[username].Where(task => task["id"] == id)) {
+            foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
                 // Validate values for non string fields
                 if (field == "classColour" || field == "typeColour") { Converter.ColorFromString(newValue); }
                 if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
@@ -127,25 +125,25 @@ namespace HomeworkTrackerServer.Storage {
             return edited;
         }
 
-        public string GetUserPassword(string username) => _users[username].Password;
+        public string GetUserPassword(string username) => Users[username].Password;
 
         public void ChangePassword(string id, string newPassword) {
-            _users[id].Password = newPassword;
+            Users[id].Password = newPassword;
         }
 
         public void ChangeUsername(string userId, string newUsername) {
-            _users[userId].Username = newUsername;
+            Users[userId].Username = newUsername;
         }
 
-        public User[] GetAllUsers() => _users.Values.ToArray();
-        public User GetUser(string userId) => _users[userId];
+        public User[] GetAllUsers() => Users.Values.ToArray();
+        public User GetUser(string userId) => Users[userId];
         public string GetUserId(string username) {
-            return _users.Values.Where(usr => usr.Username == username).Select(usr => usr.Guid).FirstOrDefault();
+            return Users.Values.Where(usr => usr.Username == username).Select(usr => usr.Guid).FirstOrDefault();
             // Not found
         }
 
         public HomeworkTask GetTask(string taskId) => 
-            (from usersTasks in _tasks
+            (from usersTasks in Tasks
             from task in usersTasks.Value.Where(task => task["id"] == taskId)
             select new HomeworkTask {
                 Owner = usersTasks.Key,
@@ -160,16 +158,17 @@ namespace HomeworkTrackerServer.Storage {
         
 
         public string GetOwnerOfTask(string taskId) {
-            return (from usersTasks in _tasks
+            return (from usersTasks in Tasks
                 from task in usersTasks.Value.Where(task => task["id"] == taskId)
                 select usersTasks.Key).FirstOrDefault();
         }
 
-        public void Init(IConfiguration config) {
-            _users = new Dictionary<string, User>();
-            _tasks = new Dictionary<string, List<Dictionary<string, string>>>();
+        public virtual void Init() {
+            Users = new Dictionary<string, User>();
+            Tasks = new Dictionary<string, List<Dictionary<string, string>>>();
         }
-        
+
+        public virtual void Deinit() { }
         
     }
 }

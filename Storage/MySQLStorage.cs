@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
 using HomeworkTrackerServer.Objects;
-using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using RayKeys.Misc;
 
@@ -331,12 +329,12 @@ namespace HomeworkTrackerServer.Storage {
             return true;
         }
 
-        public void Init(IConfiguration config) {
+        public void Init() {
             Logger.Info("Connecting to MySQL...");
-            _connectString = $"server={config["mysql_ip"]};" +
-                             $"userid={config["mysql_user"]};" +
-                             $"password={config["mysql_password"]};" +
-                             $"database={config["mysql_database"]}";
+            _connectString = $"server={Program.Config["mysql_ip"]};" +
+                             $"userid={Program.Config["mysql_user"]};" +
+                             $"password={Program.Config["mysql_password"]};" +
+                             $"database={Program.Config["mysql_database"]}";
 
             try {
                 _connection = new MySqlConnection(_connectString);
@@ -352,6 +350,10 @@ namespace HomeworkTrackerServer.Storage {
             Logger.Info("Creating tables in MySQL...");
             CreateTables();
             Logger.Info("Created MySQL tables");
+        }
+
+        public void Deinit() {
+            _connection.Close();
         }
         
         private static Color FromStr(string str) {

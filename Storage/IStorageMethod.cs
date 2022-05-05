@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 using HomeworkTrackerServer.Objects;
-using Microsoft.Extensions.Configuration;
 
 namespace HomeworkTrackerServer.Storage {
     public interface IStorageMethod {
-        // TODO: fix the methods in the storage files to make them use user ids instead of usernames
-        
         public List<Dictionary<string, string>> GetTasks(string id);
         public bool AuthUser(string username, string password, out string id);
         public bool AuthUser(string username, string password);
@@ -24,6 +21,7 @@ namespace HomeworkTrackerServer.Storage {
         public HomeworkTask GetTask(string taskId);
         public string GetOwnerOfTask(string taskId);
 
-        public void Init(IConfiguration config);
+        public void Init();
+        public void Deinit();
     }
 }
