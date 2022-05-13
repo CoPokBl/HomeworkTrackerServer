@@ -19,6 +19,9 @@ namespace HomeworkTrackerServer {
         
         public static void Main(string[] args) {
             
+            // Initialize logging (There are log commands before this but they will still work)
+            Logger.Init(LogLevel.Debug);
+            
             // Debug option (This option exists because of stupid ASP.NET stuff, I will remove eventually in favour of Logger.Debug)
             if (args.Length > 0 && args[0] == "debug") {
                 Debug = true;
@@ -42,8 +45,7 @@ namespace HomeworkTrackerServer {
                 throw new Exception("Failed to load config");
             }
             
-            // Initialize logging (There are log commands before this but they will still work)
-            Logger.Init((LogLevel) int.Parse(Config["LoggingLevel"]));
+            Logger._loggingLevel = (LogLevel) int.Parse(Config["LoggingLevel"]);
 
             // Run actual server (Catch all errors)
             try {
