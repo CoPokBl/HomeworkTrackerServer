@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace HomeworkTrackerServer {
     public static class Logger {
-        private static LogLevel _loggingLevel = LogLevel.Debug;
+        public static LogLevel _loggingLevel = LogLevel.Debug;
         private static FileStream _logFile;
         private static StreamWriter _streamWriter;
         private static Task _writeTask = Task.CompletedTask;
