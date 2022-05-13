@@ -1,4 +1,6 @@
 {
+  "bind_address": "http://*:9898",
+  
   "mysql_ip": "mysql.example.net",
   "mysql_user": "admin",
   "mysql_password": "",

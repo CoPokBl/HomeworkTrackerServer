@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text;
 
 namespace HomeworkTrackerServer.Objects {
     
     public static class Converter {
         
         public static string Base64Encode(string plainText) =>
-            System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(plainText));
+            Convert.ToBase64String(Encoding.UTF8.GetBytes(plainText));
         
         public static string Base64Decode(string base64EncodedData) => 
-            System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(base64EncodedData));
+            Encoding.UTF8.GetString(Convert.FromBase64String(base64EncodedData));
 
         public static bool DictionaryToHomeworkTask(Dictionary<string, string> values, out HomeworkTask taskOut, bool sanitizeInputs = false) {
             string classText = "None";

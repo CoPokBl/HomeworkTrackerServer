@@ -10,10 +10,6 @@ namespace HomeworkTrackerServer.Objects {
         public long DueDate;
         public string Id;
 
-        public HomeworkTask() {
-            
-        }
-
         public ExternalHomeworkTask ToExternal() {
             return new ExternalHomeworkTask {
                 Class = Class,

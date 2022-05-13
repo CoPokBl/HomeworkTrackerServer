@@ -11,7 +11,7 @@ namespace HomeworkTrackerServer.Objects.ControllerClasses {
             // Happens every request:
             Logger.Debug(context.HttpContext.Request.Headers.Keys.Contains("User-Agent")
                 ? $"New request from: {context.HttpContext.Request.Headers["User-Agent"]}"
-                : $"New request from unknown user agent");
+                : "New request from unknown user agent");
             
             // Authenticate request
             Permissions perms = Authentication.GetPermsFromToken(HttpContext);

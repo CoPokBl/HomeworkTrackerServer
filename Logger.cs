@@ -70,7 +70,7 @@ namespace RayKeys.Misc {
             _streamWriter.AutoFlush = true;
             _writeTask = Task.CompletedTask;
             _typeText = "";
-            Logger.Info($"Logging to: {logFileName}");
+            Info($"Logging to: {logFileName}");
         }
         
         public static void Error(string log) {

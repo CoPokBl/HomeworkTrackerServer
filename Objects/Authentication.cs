@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
 namespace HomeworkTrackerServer.Objects {
@@ -8,7 +9,7 @@ namespace HomeworkTrackerServer.Objects {
     
     	// for get perms functions null return means that the token is invalid
 
-        public static Permissions GetPermsFromToken(Microsoft.AspNetCore.Http.HttpContext content) {
+        public static Permissions GetPermsFromToken(HttpContext content) {
             if (!content.Request.Headers.ContainsKey("Authorization")) {
                 // doesn't have header
                 return null;
