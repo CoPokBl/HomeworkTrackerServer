@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using HomeworkTrackerServer.Objects;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Storage {
     public class RamStorage : IStorageMethod {

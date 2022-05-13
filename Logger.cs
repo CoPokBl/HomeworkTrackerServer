@@ -1,28 +1,34 @@
+/*
+ 
+ Credit to Calcilore (https://github.com/Calcilore) for this file
+ Original: https://github.com/Calcilore/RayKeys/blob/main/Misc/Logger.cs
+ 
+ */
+
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 
-namespace RayKeys.Misc {
+namespace HomeworkTrackerServer {
     public static class Logger {
-        private static LogLevel _loggingLevel;
+        private static LogLevel _loggingLevel = LogLevel.Debug;
         private static FileStream _logFile;
         private static StreamWriter _streamWriter;
-        private static Task _writeTask;
+        private static Task _writeTask = Task.CompletedTask;
         private static string _typeText;
         
-        public static void Log(string log, LogLevel level) {
+        public static void Log(object logObj, LogLevel level) {
             if (_loggingLevel < level) return;
             
-            log = $"[{DateTime.Now.ToLongTimeString()}] [{level}]: {log}\n";
+            string log = $"[{DateTime.Now.ToLongTimeString()}] [{level}]: {logObj}\n";
             Console.Write(log);
             
             _typeText += log;
 
-            if (_writeTask.IsCompleted) {
-                _writeTask = _streamWriter.WriteAsync(_typeText);
-                _typeText = "";
-            }
+            if (!_writeTask.IsCompleted) return;
+            _writeTask = _streamWriter.WriteAsync(_typeText);
+            _typeText = "";
         }
 
         public static void WaitFlush() {
@@ -54,8 +60,6 @@ namespace RayKeys.Misc {
                 using FileStream compressedFileStream = File.Create(gzFileLoc);
                 using GZipStream compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
                 originalFileStream.CopyTo(compressor);
-                
-                File.Delete("Logs/latest.log");
             }
 
             string logFileName = $"Logs/{DateTime.Now:yyyy-MM-dd}-";
@@ -65,23 +69,22 @@ namespace RayKeys.Misc {
 
             logFileName += i + ".log";
             
-            _logFile = File.Create("Logs/latest.log");
+            _logFile = File.OpenWrite("Logs/latest.log");
             _streamWriter = new StreamWriter(_logFile);
             _streamWriter.AutoFlush = true;
-            _writeTask = Task.CompletedTask;
             _typeText = "";
             Info($"Logging to: {logFileName}");
         }
         
-        public static void Error(string log) {
+        public static void Error(object log) {
             Log(log, LogLevel.Error);
         }
         
-        public static void Info(string log) {
+        public static void Info(object log) {
             Log(log, LogLevel.Info);
         }
         
-        public static void Debug(string log) {
+        public static void Debug(object log) {
             Log(log, LogLevel.Debug);
         }
     }

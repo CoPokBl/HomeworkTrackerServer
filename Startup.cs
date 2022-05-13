@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer {
     public class Startup {
@@ -20,7 +19,7 @@ namespace HomeworkTrackerServer {
                     throw new ArgumentException(error);
                 
                 case "MySQL":
-                    Program.Storage = new MySQLStorage();
+                    Program.Storage = new MySqlStorage();
                     break;
                 
                 case "RAM":

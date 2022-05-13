@@ -2,6 +2,10 @@ using System.Collections.Generic;
 using HomeworkTrackerServer.Objects;
 
 namespace HomeworkTrackerServer.Storage {
+    
+    /// <summary>
+    /// All functions required to store and retrieve data from the database
+    /// </summary>
     public interface IStorageMethod {
         public List<Dictionary<string, string>> GetTasks(string id);
         public bool AuthUser(string username, string password, out string id);

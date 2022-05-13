@@ -8,6 +8,11 @@ using Microsoft.IdentityModel.Tokens;
 namespace HomeworkTrackerServer.Objects {
     public static class TokenHandler {
 
+        /// <summary>
+        /// Create a JWT token for the given user
+        /// </summary>
+        /// <param name="id">The ID of the user that the token is for</param>
+        /// <returns>The resulting JWT</returns>
         public static string GenerateToken(string id) {
             string mySecret = Program.Config["TokenSecret"];
             SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
@@ -26,6 +31,12 @@ namespace HomeworkTrackerServer.Objects {
             return tokenHandler.WriteToken(token);
         }
         
+        /// <summary>
+        /// Check if an ID is valid and get the owner
+        /// </summary>
+        /// <param name="token">The JWT token to check</param>
+        /// <param name="id">The ID of the user</param>
+        /// <returns>Whether or not the token is valid</returns>
         public static bool ValidateCurrentToken(string token, out string id) {
             string mySecret = Program.Config["TokenSecret"];
             SymmetricSecurityKey mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));

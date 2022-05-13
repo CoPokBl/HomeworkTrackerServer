@@ -5,7 +5,6 @@ using HomeworkTrackerServer.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer {
     public static class Program {
@@ -42,10 +41,11 @@ namespace HomeworkTrackerServer {
                 Logger.Error($"Failed to load config {e.Message}");
                 throw new Exception("Failed to load config");
             }
+            
+            // Initialize logging (There are log commands before this but they will still work)
+            Logger.Init((LogLevel) int.Parse(Config["LoggingLevel"]));
 
-            LoggingLevel = (LogLevel) int.Parse(Config["LoggingLevel"]);
-            Logger.Init(LoggingLevel);
-
+            // Run actual server (Catch all errors)
             try {
                 CreateHostBuilder(args).Build().Run();
             }
@@ -66,7 +66,7 @@ namespace HomeworkTrackerServer {
             } else Logger.Info("Storage not initialized, skipping deinit");
             
             Logger.Info("Bye!");
-            Logger.WaitFlush();
+            Logger.WaitFlush();  // Flush all logs
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>

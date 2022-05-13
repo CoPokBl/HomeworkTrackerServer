@@ -3,7 +3,6 @@ using HomeworkTrackerServer.Objects;
 using HomeworkTrackerServer.Objects.ControllerClasses;
 using HomeworkTrackerServer.Objects.HeaderParams;
 using Microsoft.AspNetCore.Mvc;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Controllers {
     

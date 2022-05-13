@@ -3,7 +3,6 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Objects.ControllerClasses {
     public class ApiController : Controller {

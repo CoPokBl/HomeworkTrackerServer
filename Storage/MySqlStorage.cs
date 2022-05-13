@@ -6,11 +6,10 @@ using System.Security.Cryptography;
 using System.Text;
 using HomeworkTrackerServer.Objects;
 using MySql.Data.MySqlClient;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Storage {
     
-    public class MySQLStorage : IStorageMethod {
+    public class MySqlStorage : IStorageMethod {
 
         private MySqlConnection _connection;  // MySQL Connection Object
         private string _connectString;

@@ -5,7 +5,6 @@ using HomeworkTrackerServer.Objects.ControllerClasses;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using RayKeys.Misc;
 
 namespace HomeworkTrackerServer.Controllers {
     
