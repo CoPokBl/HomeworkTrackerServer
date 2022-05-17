@@ -1,50 +1,73 @@
+/*
+
+Welcome To Homework Tracker Server's Source Code
+
+Things to do TODO:
+
+- Push notifications using OneSignal
+- More robust error handling
+- More app args
+
+ */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using HomeworkTrackerServer.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
 
 namespace HomeworkTrackerServer {
     public static class Program {
-        
-        public static LogLevel LoggingLevel = LogLevel.Debug;
         public static IStorageMethod Storage;
-        public static readonly Version Ver = new Version(0, 8, 0);
+        public static readonly Version Ver = new(0, 9, 0);
         public const string WwwAuthHeader = "Bearer realm=\"HomeworkAccounts\"";
         public static bool Debug;
         public static bool StorageInitialized = false;
         public static Dictionary<string, string> Config;
         
         public static void Main(string[] args) {
-            
-            // Initialize logging (There are log commands before this but they will still work)
+
+            // Initialize logging (LogLevel gets updated once config is loaded)
             Logger.Init(LogLevel.Debug);
             
-            // Debug option (This option exists because of stupid ASP.NET stuff, I will remove eventually in favour of Logger.Debug)
-            if (args.Length > 0 && args[0] == "debug") {
-                Debug = true;
-            }
-            
-            // Custom config because ASP.NETs config system is stupid
-            try {
-                // Don't bother creating a default config because they get it when they build
-                if (!File.Exists("config.json")) {
-                    throw new FileNotFoundException("config.json not found, please create it or rebuild the project");
+            // Apply args
+            for (int i = 0; i < args.Length; i++) {
+                switch (args[i]) {
+                    case "--debug":
+                        Debug = true;
+                        Logger.Info("Debug mode enabled");
+                        break;
+                    case "--directory":
+                        try {
+                            Directory.SetCurrentDirectory(args[i+1]);
+                        }
+                        catch (Exception) {
+                            Logger.Error("Invalid directory");
+                            return;
+                        }
+                        Logger.Info("Set active directory to " + Directory.GetCurrentDirectory());
+                        i++;
+                        break;
+                    // TODO: custom config file location
                 }
-                // Get config data
-                string data = File.ReadAllText("config.json");
-                Dictionary<string, string> configDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
-                Config = configDict;
-                Logger.Info("Loaded config");
             }
-            catch (Exception e) {
-                // Failed to load config
-                Logger.Error($"Failed to load config {e.Message}");
-                throw new Exception("Failed to load config");
-            }
+
+            // Print info
+            Logger.Info($"Starting Homework Tracker Server v{Ver}");
+            Logger.Info($"Active Directory: {Directory.GetCurrentDirectory()}");
             
+            // Custom config because ASP.NET's config system is stupid
+            Logger.Info("Loading config...");
+            try {
+                Config = ConfigManager.LoadConfig();  // Attempt to load config and correct any errors
+            }
+            catch (Exception) {
+                Logger.Error("Failed to load config!");
+                throw;
+            }
+            Logger.Info("Loaded config");
+
             Logger._loggingLevel = (LogLevel) int.Parse(Config["LoggingLevel"]);
 
             // Run actual server (Catch all errors)
@@ -71,6 +94,7 @@ namespace HomeworkTrackerServer {
             Logger.WaitFlush();  // Flush all logs
         }
 
+        // Yes I'm aware that http is insecure but you should just use a reverse proxy for https
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder => {

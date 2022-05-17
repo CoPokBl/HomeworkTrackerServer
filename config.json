@@ -1,4 +1,6 @@
 {
+  "----COMMENT----": "This file is no longer used but I keep it here for reference at least for now",
+  
   "bind_address": "http://*:9898",
   
   "mysql_ip": "mysql.example.net",

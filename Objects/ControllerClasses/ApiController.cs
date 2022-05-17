@@ -15,7 +15,7 @@ namespace HomeworkTrackerServer.Objects.ControllerClasses {
             HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "*");
 
             // debug headers
-            if (Program.Debug) {
+            if (Program.Debug) {  // I'd remove this but it's more efficient
                 foreach (KeyValuePair<string, StringValues> header in HttpContext.Request.Headers) {
                     Logger.Debug("Header | " + header.Key + ": " + header.Value);
                 }

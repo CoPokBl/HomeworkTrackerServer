@@ -4,6 +4,7 @@ using System.Net;
 
 namespace HomeworkTrackerServer.Objects {
     
+    // TODO: Make it ratelimit per user instead of per IP
     public static class RateLimiting {
         
         /// <summary>

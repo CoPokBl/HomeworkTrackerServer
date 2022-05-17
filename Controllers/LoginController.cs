@@ -18,9 +18,7 @@ namespace HomeworkTrackerServer.Controllers {
                 return BadRequest("Authorization is missing");
             }
 
-            if (Program.Debug) {
-                Logger.Debug("Authorization: " + authorization);
-            }
+            Logger.Debug("Authorization: " + authorization);
             
             ExternalUser externalUser;
             try {
@@ -36,7 +34,7 @@ namespace HomeworkTrackerServer.Controllers {
             }
             catch (Exception e) {
                 // Invalid something
-                return BadRequest(Program.Debug ? "Invalid authorization header: " + e : "Invalid authorization header: " + e.Message);
+                return BadRequest(Program.Debug ? $"Invalid authorization header: {e}" : $"Invalid authorization header: {e.Message}");
             }
 
             if (!Program.Storage.AuthUser(externalUser.Username, externalUser.Password, out string id)) {
