@@ -66,8 +66,10 @@ public class Startup {
             app.UseDeveloperExceptionPage();
         }
 
-        // TODO: Add HTTPS support
-        // app.UseHttpsRedirection();
+        // Only do it if our master says so
+        if (Program.Config["HttpsRedirection"] == "true") {
+            app.UseHttpsRedirection();
+        }
 
         app.UseRouting();
 

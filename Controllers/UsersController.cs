@@ -26,10 +26,16 @@ public class UsersController : ApiController {
             return NoContent();
         }
         Permissions perms = Authentication.GetPermsFromToken(HttpContext);
-            
+
         // Good auth
-        if (perms != null && (perms.IsAuthed(id) || perms.IsSysAdmin)) return Ok(Program.Storage.GetUser(id));
-            
+        if (perms != null && (perms.IsAuthed(id) || perms.IsSysAdmin)) {
+            // Rate limit
+            if (!RateLimiting.CheckRequest(perms.Id)) {
+                return StatusCode(429);
+            }
+            return Ok(Program.Storage.GetUser(id));
+        }
+
         // Bad auth
         HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
         return Unauthorized();

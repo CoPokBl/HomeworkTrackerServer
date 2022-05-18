@@ -34,6 +34,11 @@ public class TasksController : ApiController {
             HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
             return Unauthorized();  // Kick em out
         }
+        
+        // Rate limit
+        if (!RateLimiting.CheckRequest(perms.Id)) {
+            return StatusCode(429);
+        }
 
         return Ok(Program.Storage.GetTask(id));
     }
@@ -46,6 +51,11 @@ public class TasksController : ApiController {
         if (perms == null) {
             HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
             return Unauthorized();  // Kick em out
+        }
+        
+        // Rate limit
+        if (!RateLimiting.CheckRequest(perms.Id)) {
+            return StatusCode(429);
         }
             
         if (task == null) { return BadRequest("You must provide the task in JSON form"); }

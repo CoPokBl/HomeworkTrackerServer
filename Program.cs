@@ -6,7 +6,6 @@ Things to do TODO:
 
 - Push notifications using OneSignal
 - More robust error handling
-- More app args
 
  */
 
@@ -28,10 +27,12 @@ public static class Program {
     public static Dictionary<string, string> Config;
         
     public static void Main(string[] args) {
+        
+        Console.WriteLine("Starting Log Initialization");
 
         // Initialize logging (LogLevel gets updated once config is loaded)
         Logger.Init(LogLevel.Debug);
-            
+        
         // Apply args
         for (int i = 0; i < args.Length; i++) {
             switch (args[i]) {
@@ -39,6 +40,7 @@ public static class Program {
                     Debug = true;
                     Logger.Info("Debug mode enabled");
                     break;
+                
                 case "--directory":
                     try {
                         Directory.SetCurrentDirectory(args[i+1]);
@@ -50,7 +52,13 @@ public static class Program {
                     Logger.Info("Set active directory to " + Directory.GetCurrentDirectory());
                     i++;
                     break;
-                // TODO: custom config file location
+                
+                case "--config":
+                    ConfigManager.ConfigFileName = args[i+1];
+                    Logger.Info("Set config file to: " + args[i+1]);
+                    i++;
+                    break;
+                
             }
         }
 

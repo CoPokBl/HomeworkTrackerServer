@@ -40,6 +40,11 @@ public class LoginController : ApiController {
         if (!Program.Storage.AuthUser(externalUser.Username, externalUser.Password, out string id)) {
             return Unauthorized();
         }
+        
+        // Rate limit
+        if (!RateLimiting.CheckRequest(id)) {
+            return StatusCode(429);
+        }
 
         // do thing
         return Ok(TokenHandler.GenerateToken(id));

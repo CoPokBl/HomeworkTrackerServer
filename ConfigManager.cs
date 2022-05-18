@@ -8,10 +8,10 @@ namespace HomeworkTrackerServer;
 
 public static class ConfigManager {
         
-    private const string ConfigFileName = "config.json";  // I think this is a pretty good name for a config file.
+    public static string ConfigFileName = "config.json";  // I think this is a pretty good name for a config file.
         
     // The default values for the config file
-    private static readonly Dictionary<string, string> DefaultConfig = new Dictionary<string, string> {
+    private static readonly Dictionary<string, string> DefaultConfig = new() {
         { "bind_address", "http://*:9898" },
         { "mysql_ip", "mysql.example.net" },
         { "mysql_user", "admin" },
@@ -22,7 +22,8 @@ public static class ConfigManager {
         { "TokenSecret", "secret (CHANGE THIS)" },
         { "TokenExpirationHours", "168" },
         { "TokenIssuer", "HomeworkTracker" },
-        { "TokenAudience", "HomeworkTrackerUsers" }
+        { "TokenAudience", "HomeworkTrackerUsers" },
+        { "HttpsRedirection", "false" }
     };
         
     // All the values that should be in the config file
@@ -33,12 +34,12 @@ public static class ConfigManager {
     /// </summary>
     /// <returns>The config file represented as a Dictionary</returns>
     public static Dictionary<string, string> LoadConfig() {
-            
+        
         // Don't bother creating a default config because they get it when they build
         if (!File.Exists(ConfigFileName)) {
             // It doesn't exist, so create it and give them the default config
             File.Create(ConfigFileName).Close();
-            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(DefaultConfig));
+            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(DefaultConfig, Formatting.Indented));
             Logger.Info("Config file created with default values");
             return DefaultConfig;
         }
@@ -48,9 +49,11 @@ public static class ConfigManager {
         Dictionary<string, string> configDict;
         try {
             configDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+            if (configDict == null) throw new Exception("Config file is not valid JSON");
         }
-        catch (JsonSerializationException e) {
+        catch (Exception e) {
             // Config is invalid
+            Logger.Error(e);
             throw new Exception("Config file is invalid: " + e.Message);
         }
             
@@ -66,7 +69,7 @@ public static class ConfigManager {
         }
         if (!wholeConfigValid) {
             // Save the config file
-            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(configDict));
+            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(configDict, Formatting.Indented));
             Logger.Info("Wrote missing config values to config file");
         }
             
