@@ -15,8 +15,8 @@ This is an API for keeping track of your homework, I will be making clients that
 Yeah there are probably alternatives but I am making this to learn more about APIs and how they work, this is NOT a commercial project. I may stop working on this at any time if I get bored and I don't have any goals beyond making it fully functional. I will add features as a see fit or as I want them, you can suggest features but I won't necessarily add them.
 
 ## Hosting
-I will be keeping the latest working release of this project hosted at *http://homeworktrack.serble.net:9898/*
-
+I will be keeping the latest working release of this project hosted at *http://homeworktrack.serble.net:9898/* or *https://homeworktrack.serble.net:9897/* for HTTPS
+ 
 ## Contact me
 I prefer to use discord for communication, you can DM me at CoPokBl#9451 if you have any questions surrounding this project.
 
