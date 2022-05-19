@@ -71,6 +71,11 @@ public static class TokenHandler {
                 case "password":
                     pass = claim.Value;
                     break;
+                
+                default:
+                    // If it isn't one of the ones we're looking for, we don't care
+                    // Apparently, writing useless default cases is good practice
+                    break;
             }
         }
 

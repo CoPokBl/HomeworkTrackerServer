@@ -111,12 +111,19 @@ public class RamStorage : IStorageMethod {
     }
         
     public bool EditTask(string username, string id, string field, string newValue) {
-        if (field == "id") { throw new Exception("The field 'id' cannot be edited"); }
+        if (field == "id") { throw new InvalidOperationException("The field 'id' cannot be edited"); }
         bool edited = false;
         foreach (Dictionary<string, string> task in Tasks[username].Where(task => task["id"] == id)) {
-            // Validate values for non string fields
-            if (field == "classColour" || field == "typeColour") { Converter.ColorFromString(newValue); }
-            if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
+            switch (field) {
+                // Validate values for non string fields
+                case "classColour":
+                case "typeColour":
+                    Converter.ColorFromString(newValue);
+                    break;
+                case "dueDate":
+                    DateTime.FromBinary(long.Parse(newValue));
+                    break;
+            }
             task[field] = newValue;  // This will throw if the field is invalid
             edited = true;
             break;  // If there were multiple then something is wrong so who cares

@@ -316,7 +316,7 @@ public class MySqlStorage : IStorageMethod {
         
     public bool EditTask(string userId, string id, string field, string newValue) {
         if (field == "id" || field == "owner") { throw new ArgumentException($"The field '{field}' cannot be edited"); }
-        if (field == "classColour" || field == "typeColour") { FromStr(newValue); }
+        if (field == "classColour" || field == "typeColour") { ColorFromStr(newValue); }
         if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
             
         using MySqlCommand cmd2 = new MySqlCommand("UPDATE hw_tasks SET @field=@value WHERE id=@id", _connection);
@@ -341,7 +341,7 @@ public class MySqlStorage : IStorageMethod {
         }
         catch (Exception e) {
             Logger.Debug(e.ToString());
-            throw new Exception("Failed to connect to MySQL");
+            throw new StorageFailException("Failed to connect to MySQL");
         }
         Logger.Info("Connected MySQL");
         _connection.StateChange += DatabaseConnectStateChanged;
@@ -352,10 +352,16 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public void Deinit() {
-        _connection.Close();
+        try {
+            _connection.Close();
+        }
+        catch (Exception) {
+            Logger.Error("Failed to close MySQL connection");
+        }
     }
         
-    private static Color FromStr(string str) {
+    // The return value isn't used because this function is used as a way to detect invalid colours
+    private static Color ColorFromStr(string str) {
         if (str == "-1.-1.-1") {
             return Color.Empty;
         }
@@ -388,7 +394,10 @@ public class MySqlStorage : IStorageMethod {
     }
 
     private void DatabaseConnectStateChanged(object obj, StateChangeEventArgs args) {
-        if (args.CurrentState != ConnectionState.Broken && args.CurrentState != ConnectionState.Closed) return;
+        if (args.CurrentState != ConnectionState.Broken && 
+            args.CurrentState != ConnectionState.Closed) {
+            return;
+        }
             
         // Reconnect
         try {
@@ -398,7 +407,7 @@ public class MySqlStorage : IStorageMethod {
         catch (Exception e) {
             Logger.Error("MySQL reconnect failed: " + e);
             _connection.StateChange -= DatabaseConnectStateChanged;  // Don't loop connect
-            throw new Exception("Failed to reconnect to MySQL");
+            throw new StorageFailException("Failed to reconnect to MySQL");
         }
     }
 

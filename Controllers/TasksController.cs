@@ -17,7 +17,7 @@ public class TasksController : ApiController {
             
         // Auth
         Permissions perms = Authentication.GetPermsFromToken(HttpContext);
-        if (perms != null) return Ok(Program.Storage.GetTasks(perms.Id).ToArray());
+        if (perms != null) { return Ok(Program.Storage.GetTasks(perms.Id).ToArray()); }
         HttpContext.Response.Headers.Add("WWW-Authenticate", Program.WwwAuthHeader);
         return Unauthorized();  // Kick em out
 

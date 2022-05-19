@@ -13,21 +13,21 @@ using System.Threading.Tasks;
 namespace HomeworkTrackerServer; 
 
 public static class Logger {
-    public static LogLevel _loggingLevel = LogLevel.Debug;
+    public static LogLevel LoggingLevel { get; set; } = LogLevel.Debug;
     private static FileStream _logFile;
     private static StreamWriter _streamWriter;
     private static Task _writeTask = Task.CompletedTask;
     private static string _typeText;
         
     public static void Log(object logObj, LogLevel level) {
-        if (_loggingLevel < level) return;
+        if (LoggingLevel < level) { return; }
             
         string log = $"[{DateTime.Now.ToLongTimeString()}] [{level}]: {logObj}\n";
         Console.Write(log);
             
         _typeText += log;
 
-        if (!_writeTask.IsCompleted) return;
+        if (!_writeTask.IsCompleted) { return; }
         _writeTask = _streamWriter.WriteAsync(_typeText);
         _typeText = "";
     }
@@ -40,9 +40,9 @@ public static class Logger {
     }
 
     public static void Init(LogLevel logLevel) {
-        _loggingLevel = logLevel;
+        LoggingLevel = logLevel;
 
-        if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
+        if (!Directory.Exists("Logs")) { Directory.CreateDirectory("Logs"); }
             
         if (File.Exists("Logs/latest.log")) {
             using FileStream originalFileStream = File.Open("Logs/latest.log", FileMode.Open);

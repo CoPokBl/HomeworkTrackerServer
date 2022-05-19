@@ -40,7 +40,7 @@ public class Startup {
         catch (Exception e) {
             Logger.Error("Failed to initialize storage: " + e.Message);
             Logger.Debug(e.ToString());  // Debug whole error
-            throw new Exception("Failed to initialize storage");
+            throw;
         }
         Program.StorageInitialized = true;
         Logger.Info("Initialised Storage");

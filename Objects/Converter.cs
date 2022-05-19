@@ -18,9 +18,18 @@ public static class Converter {
     /// </summary>
     /// <param name="values">The dictionary to convert</param>
     /// <param name="taskOut">The resulting HomeworkTask</param>
+    /// <returns>Whether or not it succeeded, it will only fail if a provided value is invalid</returns>
+    public static bool DictionaryToHomeworkTask(Dictionary<string, string> values, out HomeworkTask taskOut) =>
+        DictionaryToHomeworkTask(values, out taskOut, false);
+
+    /// <summary>
+    /// Converts a Dictionary of values into a HomeworkTask object
+    /// </summary>
+    /// <param name="values">The dictionary to convert</param>
+    /// <param name="taskOut">The resulting HomeworkTask</param>
     /// <param name="sanitizeInputs">Whether or not to ignore inputs which shouldn't be edited, like ID</param>
     /// <returns>Whether or not it succeeded, it will only fail if a provided value is invalid</returns>
-    public static bool DictionaryToHomeworkTask(Dictionary<string, string> values, out HomeworkTask taskOut, bool sanitizeInputs = false) {
+    public static bool DictionaryToHomeworkTask(Dictionary<string, string> values, out HomeworkTask taskOut, bool sanitizeInputs) {
         string classText = "None";
         string classColour = "-1.-1.-1";
         string task = "None";
@@ -37,9 +46,12 @@ public static class Converter {
         if (!sanitizeInputs) { if (values.ContainsKey("id")) { id = values["id"]; } }
 
         try {
-            if (values.ContainsKey("dueDate")) 
-                if (long.Parse(values["dueDate"]) != 0) { dueDate = DateTime.FromBinary(long.Parse(values["dueDate"])).ToBinary(); }
-            
+            if (values.ContainsKey("dueDate")) {
+                if (long.Parse(values["dueDate"]) != 0) {
+                    dueDate = DateTime.FromBinary(long.Parse(values["dueDate"])).ToBinary();
+                }
+            }
+
             ColorFromString(classColour);
             ColorFromString(typeColour);
         }

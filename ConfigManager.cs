@@ -7,9 +7,8 @@ using Newtonsoft.Json;
 namespace HomeworkTrackerServer; 
 
 public static class ConfigManager {
-        
-    public static string ConfigFileName = "config.json";  // I think this is a pretty good name for a config file.
-        
+    public static string ConfigFileName { get; set; } = "config.json";
+
     // The default values for the config file
     private static readonly Dictionary<string, string> DefaultConfig = new() {
         { "bind_address", "http://*:9898" },
@@ -49,12 +48,12 @@ public static class ConfigManager {
         Dictionary<string, string> configDict;
         try {
             configDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
-            if (configDict == null) throw new Exception("Config file is not valid JSON");
+            if (configDict == null) { throw new InvalidConfigException("Config file is not valid JSON"); }
         }
         catch (Exception e) {
             // Config is invalid
             Logger.Error(e);
-            throw new Exception("Config file is invalid: " + e.Message);
+            throw new InvalidConfigException("Config file is invalid: " + e.Message);
         }
             
         // Check if all the required values are there
@@ -78,4 +77,8 @@ public static class ConfigManager {
             
     }
 
+}
+
+internal class InvalidConfigException : Exception {
+    public InvalidConfigException(string message) : base(message) { }
 }

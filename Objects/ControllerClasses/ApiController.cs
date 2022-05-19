@@ -27,18 +27,6 @@ public class ApiController : Controller {
         
         // Somehow it can be null
         string ipStr = ip == null ? "Unknown IP" : ip.ToString();
-        
-        // rate limit (Rate limiting moved to per user)
-        // if (ip != null && !RateLimiting.CheckRequest(ip)) {
-        //     Logger.Debug("Rate limit exceeded for ip: " + ipStr);
-        //     // rate limit exceeded
-        //     context.Result = new ContentResult {
-        //         Content = "Rate limit exceeded",
-        //         StatusCode = (int) HttpStatusCode.TooManyRequests
-        //     };
-        //     return;
-        // }
-            
 
         base.OnActionExecuting(context);
         // Happens every request:

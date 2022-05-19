@@ -19,13 +19,13 @@ using Microsoft.Extensions.Hosting;
 namespace HomeworkTrackerServer; 
 
 public static class Program {
-    public static IStorageMethod Storage;
+    public static IStorageMethod Storage { get; set; }
     public static readonly Version Ver = new(0, 9, 0);
-    public const string WwwAuthHeader = "Bearer realm=\"HomeworkAccounts\"";
-    public static bool Debug;
-    public static bool StorageInitialized = false;
-    public static Dictionary<string, string> Config;
-        
+    public static readonly string WwwAuthHeader = "Bearer realm=\"HomeworkAccounts\"";
+    public static bool Debug { get; private set; }
+    public static bool StorageInitialized { get; set; }
+    public static Dictionary<string, string> Config { get; private set; }
+
     public static void Main(string[] args) {
         
         Console.WriteLine("Starting Log Initialization");
@@ -36,6 +36,7 @@ public static class Program {
         // Apply args
         for (int i = 0; i < args.Length; i++) {
             switch (args[i]) {
+                
                 case "--debug":
                     Debug = true;
                     Logger.Info("Debug mode enabled");
@@ -50,13 +51,13 @@ public static class Program {
                         return;
                     }
                     Logger.Info("Set active directory to " + Directory.GetCurrentDirectory());
-                    i++;
+                    i++;  // Skip next arg because it's the directory
                     break;
                 
                 case "--config":
                     ConfigManager.ConfigFileName = args[i+1];
                     Logger.Info("Set config file to: " + args[i+1]);
-                    i++;
+                    i++;  // Skip next arg because it's the config file
                     break;
                 
             }
@@ -71,13 +72,13 @@ public static class Program {
         try {
             Config = ConfigManager.LoadConfig();  // Attempt to load config and correct any errors
         }
-        catch (Exception) {
-            Logger.Error("Failed to load config!");
+        catch (InvalidConfigException) {
+            Logger.Error("Failed to load config, config is invalid!");
             throw;
         }
         Logger.Info("Loaded config");
 
-        Logger._loggingLevel = (LogLevel) int.Parse(Config["LoggingLevel"]);
+        Logger.LoggingLevel = (LogLevel) int.Parse(Config["LoggingLevel"]);
 
         // Run actual server (Catch all errors)
         try {
@@ -94,10 +95,10 @@ public static class Program {
                 Storage.Deinit();
             }
             catch (Exception e) {
-                Logger.Error("Storage deinit failed: " + e.Message);
-                Logger.Debug(e.ToString());
+                Logger.Error("Storage deinit failed: ");
+                Logger.Error(e);
             }
-        } else Logger.Info("Storage not initialized, skipping deinit");
+        } else { Logger.Info("Storage not initialized, skipping deinit"); }
             
         Logger.Info("Bye!");
         Logger.WaitFlush();  // Flush all logs

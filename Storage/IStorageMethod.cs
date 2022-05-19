@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HomeworkTrackerServer.Objects;
 
@@ -27,4 +28,8 @@ public interface IStorageMethod {
 
     public void Init();
     public void Deinit();
+}
+
+internal class StorageFailException : Exception {
+    public StorageFailException(string message) : base(message) { }
 }
