@@ -13,8 +13,8 @@ public interface IStorageMethod {
     public bool AuthUser(string username, string password);
     public bool CreateUser(User user);
     public void RemoveUser(string userId);
-    public bool AddTask(string userId, Dictionary<string, string> values);
-    public bool AddTask(string userId, Dictionary<string, string> values, out string id);
+    public bool TryAddTask(string userId, Dictionary<string, string> values);
+    public bool TryAddTask(string userId, Dictionary<string, string> values, out string id);
     public bool RemoveTask(string userId, string id);
     public bool EditTask(string userId, string id, string field, string newValue);
     public string GetUserPassword(string userId);

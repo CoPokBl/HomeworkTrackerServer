@@ -59,7 +59,8 @@ public static class ConfigManager {
         // Check if all the required values are there
         bool wholeConfigValid = true;
         foreach (string requiredValue in RequiredConfigValues) {
-            if (configDict.ContainsKey(requiredValue)) continue;
+            if (configDict.ContainsKey(requiredValue)) { continue; }
+            
             // Missing a required value, so add it
             configDict.Add(requiredValue, DefaultConfig[requiredValue]);
             Logger.Info($"Config file is missing required value ({requiredValue}) and was added with " +
@@ -79,6 +80,6 @@ public static class ConfigManager {
 
 }
 
-internal class InvalidConfigException : Exception {
+public class InvalidConfigException : Exception {
     public InvalidConfigException(string message) : base(message) { }
 }

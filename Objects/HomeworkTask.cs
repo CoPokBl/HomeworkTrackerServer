@@ -4,14 +4,14 @@ namespace HomeworkTrackerServer.Objects;
 /// A Homework Task represented in object form
 /// </summary>
 public class HomeworkTask {
-    public string Owner;
-    public string Class;
-    public string ClassColour;
-    public string Type;
-    public string TypeColour;
-    public string Task;
-    public long DueDate;
-    public string Id;
+    public string Owner { get; set; }
+    public string Class { get; set; }
+    public string ClassColour { get; set; }
+    public string Type { get; set; }
+    public string TypeColour { get; set; }
+    public string Task { get; set; }
+    public long DueDate { get; set; }
+    public string Id { get; set; }
 
     /// <summary>
     /// Convert task to censored object (object without important fields)
@@ -33,10 +33,10 @@ public class HomeworkTask {
 /// A censored version of a Homework Task
 /// </summary>
 public class ExternalHomeworkTask {
-    public string Class;
-    public string ClassColour;
-    public string Type;
-    public string TypeColour;
-    public string Task;
-    public long DueDate;
+    public string Class { get; init; }
+    public string ClassColour { get; init; }
+    public string Type { get; init; }
+    public string TypeColour { get; init; }
+    public string Task { get; init; }
+    public long DueDate { get; init; }
 }

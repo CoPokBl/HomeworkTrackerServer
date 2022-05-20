@@ -19,8 +19,8 @@ public static class Converter {
     /// <param name="values">The dictionary to convert</param>
     /// <param name="taskOut">The resulting HomeworkTask</param>
     /// <returns>Whether or not it succeeded, it will only fail if a provided value is invalid</returns>
-    public static bool DictionaryToHomeworkTask(Dictionary<string, string> values, out HomeworkTask taskOut) =>
-        DictionaryToHomeworkTask(values, out taskOut, false);
+    public static bool TryConvertDicToTask(Dictionary<string, string> values, out HomeworkTask taskOut) =>
+        TryConvertDicToTask(values, out taskOut, false);
 
     /// <summary>
     /// Converts a Dictionary of values into a HomeworkTask object
@@ -29,7 +29,7 @@ public static class Converter {
     /// <param name="taskOut">The resulting HomeworkTask</param>
     /// <param name="sanitizeInputs">Whether or not to ignore inputs which shouldn't be edited, like ID</param>
     /// <returns>Whether or not it succeeded, it will only fail if a provided value is invalid</returns>
-    public static bool DictionaryToHomeworkTask(Dictionary<string, string> values, out HomeworkTask taskOut, bool sanitizeInputs) {
+    public static bool TryConvertDicToTask(Dictionary<string, string> values, out HomeworkTask taskOut, bool sanitizeInputs) {
         string classText = "None";
         string classColour = "-1.-1.-1";
         string task = "None";

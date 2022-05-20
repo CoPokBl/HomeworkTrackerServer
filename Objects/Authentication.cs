@@ -70,16 +70,16 @@ public static class Authentication {
 /// Represents the permissions of a user.
 /// </summary>
 public class Permissions {
-        
+
     /// <summary>
     /// Whether or not the user is a server admin (Owns the server)
     /// </summary>
-    public readonly bool IsSysAdmin;
-        
+    public bool IsSysAdmin { get; }
+
     /// <summary>
     /// The ID of the validated user
     /// </summary>
-    public readonly string Id;
+    public string Id { get; }
 
     public Permissions(string userId) {
         Id = userId;

@@ -34,8 +34,9 @@ public static class Program {
         Logger.Init(LogLevel.Debug);
         
         // Apply args
-        for (int i = 0; i < args.Length; i++) {
-            switch (args[i]) {
+        int argCounter = 0;
+        while (argCounter < args.Length) {
+            switch (args[argCounter]) {
                 
                 case "--debug":
                     Debug = true;
@@ -44,23 +45,30 @@ public static class Program {
                 
                 case "--directory":
                     try {
-                        Directory.SetCurrentDirectory(args[i+1]);
+                        Directory.SetCurrentDirectory(args[argCounter+1]);
                     }
                     catch (Exception) {
                         Logger.Error("Invalid directory");
                         return;
                     }
                     Logger.Info("Set active directory to " + Directory.GetCurrentDirectory());
-                    i++;  // Skip next arg because it's the directory
+                    argCounter++;  // Skip next arg because it's the directory
                     break;
                 
                 case "--config":
-                    ConfigManager.ConfigFileName = args[i+1];
-                    Logger.Info("Set config file to: " + args[i+1]);
-                    i++;  // Skip next arg because it's the config file
+                    ConfigManager.ConfigFileName = args[argCounter+1];
+                    Logger.Info("Set config file to: " + args[argCounter+1]);
+                    argCounter++;  // Skip next arg because it's the config file
                     break;
                 
+                default:
+                    Logger.Error($"Invalid Argument: {args[argCounter]}");
+                    Logger.Info("Exiting...");
+                    return;
+
             }
+
+            argCounter++;
         }
 
         // Print info

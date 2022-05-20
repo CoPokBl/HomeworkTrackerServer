@@ -27,8 +27,7 @@ public class RamStorage : IStorageMethod {
         Logger.Debug($"Authenticating user: {username}");
         id = null;
 
-        foreach (User usr in Users.Values) {
-            if (usr.Username != username) continue;
+        foreach (User usr in Users.Values.Where(usr => usr.Username == username)) {
             Logger.Debug(usr.Password);
             Logger.Debug(Hash(password));
             Logger.Debug(Hash("a"));
@@ -65,14 +64,14 @@ public class RamStorage : IStorageMethod {
 
     public void RemoveUser(string username) { Users.Remove(username); }
 
-    public bool AddTask(string username, Dictionary<string, string> values, out string id) {
+    public bool TryAddTask(string username, Dictionary<string, string> values, out string id) {
             
         Logger.Debug("Adding task for " + username);
         id = null;
             
         if (!Tasks.ContainsKey(username)) { Tasks.Add(username, new List<Dictionary<string, string>>()); }
             
-        bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task);
+        bool success = Converter.TryConvertDicToTask(values, out HomeworkTask task);
         if (!success) { return false; }  // Invalid
 
         Dictionary<string, string> outData = new Dictionary<string, string> {
@@ -96,7 +95,7 @@ public class RamStorage : IStorageMethod {
         return true;
     }
 
-    public bool AddTask(string username, Dictionary<string, string> values) => AddTask(username, values, out _);
+    public bool TryAddTask(string username, Dictionary<string, string> values) => TryAddTask(username, values, out _);
 
     public bool RemoveTask(string username, string id) {
         bool removed = false;
@@ -123,6 +122,9 @@ public class RamStorage : IStorageMethod {
                 case "dueDate":
                     DateTime.FromBinary(long.Parse(newValue));
                     break;
+                
+                // If it's not there then it doesn't need to be validated
+                default: break;
             }
             task[field] = newValue;  // This will throw if the field is invalid
             edited = true;

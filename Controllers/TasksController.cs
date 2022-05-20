@@ -66,13 +66,13 @@ public class TasksController : ApiController {
             if (kvp.Value.Length > 255) { return BadRequest("Fields cannot be more than 255 characters"); }
         }
             
-        if (!Program.Storage.AddTask(perms.Id, task, out string id)) {
+        if (!Program.Storage.TryAddTask(perms.Id, task, out string id)) {
             // Failed
             // Invalid args
             return BadRequest("Failed to add task, rejected by storage");
         }
 
-        Converter.DictionaryToHomeworkTask(task, out HomeworkTask obj, true);
+        Converter.TryConvertDicToTask(task, out HomeworkTask obj, true);
         obj.Owner = perms.Id;
         return CreatedAtAction(nameof(GetTasks), id, obj);
 

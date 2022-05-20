@@ -5,10 +5,10 @@ using System.Text;
 namespace HomeworkTrackerServer.Objects; 
 
 public class User {
-    public string Username;
-    public string Password;
-    public long CreationDate;
-    public string Guid;
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public long CreationDate { get; init; }
+    public string Guid { get; set; }
 
     public User() { }
 

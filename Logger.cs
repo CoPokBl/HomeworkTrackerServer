@@ -65,8 +65,8 @@ public static class Logger {
 
         string logFileName = $"Logs/{DateTime.Now:yyyy-MM-dd}-";
 
-        int i;
-        for (i = 1; File.Exists(logFileName + i + ".log.gz"); i++) { }
+        int i = 1;
+        while (File.Exists(logFileName + i + ".log.gz")) { i++; }  // Get a unique number for the name
 
         logFileName += i + ".log";
             
@@ -77,21 +77,9 @@ public static class Logger {
         Info($"Logging to: {logFileName}");
     }
         
-    public static void Error(object log) {
-        Log(log, LogLevel.Error);
-    }
-        
-    public static void Info(object log) {
-        Log(log, LogLevel.Info);
-    }
-        
-    public static void Debug(object log) {
-        Log(log, LogLevel.Debug);
-    }
+    public static void Error(object log) => Log(log, LogLevel.Error);
+    public static void Info(object log) => Log(log, LogLevel.Info);
+    public static void Debug(object log) => Log(log, LogLevel.Debug);
 }
 
-public enum LogLevel {
-    Error,
-    Info,
-    Debug
-}
+public enum LogLevel { Error, Info, Debug }

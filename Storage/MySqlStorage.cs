@@ -244,12 +244,12 @@ public class MySqlStorage : IStorageMethod {
         Logger.Debug($"Removed User: {id}");
     }
 
-    public bool AddTask(string userId, Dictionary<string, string> values, out string id) {
+    public bool TryAddTask(string userId, Dictionary<string, string> values, out string id) {
             
         Logger.Debug("Adding task for " + userId);
         id = null;
 
-        bool success = Converter.DictionaryToHomeworkTask(values, out HomeworkTask task);
+        bool success = Converter.TryConvertDicToTask(values, out HomeworkTask task);
         if (!success) { return false; }  // Invalid
 
         Dictionary<string, string> outData = new Dictionary<string, string> {
@@ -304,7 +304,7 @@ public class MySqlStorage : IStorageMethod {
         return true;
     }
         
-    public bool AddTask(string username, Dictionary<string, string> values) => AddTask(username, values, out _);
+    public bool TryAddTask(string username, Dictionary<string, string> values) => TryAddTask(username, values, out _);
 
     public bool RemoveTask(string userId /* This is needed for RAMManager because of the way it is setup */, string id) {
         using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_tasks WHERE id=@id", _connection);
