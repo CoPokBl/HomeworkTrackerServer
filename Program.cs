@@ -25,6 +25,7 @@ public static class Program {
     public static bool Debug { get; private set; }
     public static bool StorageInitialized { get; set; }
     public static Dictionary<string, string> Config { get; private set; }
+    public static (string, string)[] CustomHeaders { get; set; }
 
     public static void Main(string[] args) {
         

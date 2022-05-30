@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using HomeworkTrackerServer.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,7 +45,24 @@ public class Startup {
         }
         Program.StorageInitialized = true;
         Logger.Info("Initialised Storage");
-            
+        
+        // Load custom headers
+        Logger.Info("Loading custom headers");
+        List<(string, string)> headers = new ();
+        string headersString = Program.Config["CustomHeaders"];
+        string[] headersArray = headersString.Split(';');
+        foreach (string header in headersArray) {
+            string[] headerSplit = header.Split(':');
+            if (headerSplit.Length != 2) {
+                Logger.Error("Invalid custom header: " + header);
+                continue;
+            }
+            headers.Add((headerSplit[0], headerSplit[1]));
+            Logger.Debug("Added custom header (" + headerSplit[0] + ": " + headerSplit[1] + ")");
+        }
+        Program.CustomHeaders = headers.ToArray();
+        Logger.Info("Loaded " + headers.Count + " custom headers");
+
         Logger.Debug("Finished startup");
     }
 

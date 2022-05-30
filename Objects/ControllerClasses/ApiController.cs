@@ -10,10 +10,9 @@ public class ApiController : Controller {
     public override void OnActionExecuting(ActionExecutingContext context) {
             
         // Allow connections from all origins
-        HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-        HttpContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-        HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE,TRACE,CONNECT");
-        HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "*");
+        foreach ((string, string) customHeader in Program.CustomHeaders) {
+            HttpContext.Response.Headers.Add(customHeader.Item1, customHeader.Item2);
+        }
 
         // debug headers
         if (Program.Debug) {  // I'd remove this but it's more efficient

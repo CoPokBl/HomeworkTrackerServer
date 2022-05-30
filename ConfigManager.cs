@@ -22,7 +22,9 @@ public static class ConfigManager {
         { "TokenExpirationHours", "168" },
         { "TokenIssuer", "HomeworkTracker" },
         { "TokenAudience", "HomeworkTrackerUsers" },
-        { "HttpsRedirection", "false" }
+        { "HttpsRedirection", "false" },
+        { "CustomHeaders", "Access-Control-Allow-Origin:*;Access-Control-Allow-Credentials:true;Access-Control-Allow-Methods:" +
+                            "GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE,TRACE,CONNECT;Access-Control-Allow-Headers:*" }
     };
         
     // All the values that should be in the config file
