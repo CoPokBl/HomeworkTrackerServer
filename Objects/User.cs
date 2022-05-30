@@ -33,6 +33,6 @@ public class User {
 }
     
 public class ExternalUser {
-    public string Username;
-    public string Password;
+    public string Username { get; set; }
+    public string Password { get; set; }
 }
