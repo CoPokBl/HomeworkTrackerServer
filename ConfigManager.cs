@@ -54,7 +54,7 @@ public static class ConfigManager {
         }
         catch (Exception e) {
             // Config is invalid
-            Logger.Error(e);
+            Logger.Debug(e);
             throw new InvalidConfigException("Config file is invalid: " + e.Message);
         }
             
