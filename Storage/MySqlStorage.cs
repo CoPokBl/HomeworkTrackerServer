@@ -16,7 +16,7 @@ public class MySqlStorage : IStorageMethod {
 
 
     private static string Hash(string str) {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(str))) {
             builder.Append(t.ToString("x2"));
         }
@@ -25,7 +25,7 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public string GetUserPassword(string id) {
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE id = @user", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_users WHERE id = @user", _connection);
         cmd.Parameters.AddWithValue("@user", id);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
@@ -40,7 +40,7 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public void ChangePassword(string id, string newPassword) {
-        using MySqlCommand cmd = new MySqlCommand(
+        using MySqlCommand cmd = new(
             "UPDATE hw_users SET password=@value WHERE id=@user", _connection);
         cmd.Parameters.AddWithValue("@user", id);
         cmd.Parameters.AddWithValue("@value", newPassword);
@@ -48,7 +48,7 @@ public class MySqlStorage : IStorageMethod {
     }
         
     public void ChangeUsername(string id, string newUsername) {
-        using MySqlCommand cmd = new MySqlCommand(
+        using MySqlCommand cmd = new(
             "UPDATE hw_users SET username=@value WHERE id=@user", _connection);
         cmd.Parameters.AddWithValue("@user", id);
         cmd.Parameters.AddWithValue("@value", newUsername);
@@ -56,12 +56,12 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public User[] GetAllUsers() {
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_users", _connection);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
-        List<User> users = new List<User>();
+        List<User> users = new();
         while (rdr.Read()) {
-            User usr = new User {
+            User usr = new() {
                 Username = rdr.GetString("Username"),
                 Password = rdr.GetString("Password"),
                 CreationDate = long.Parse(rdr.GetString("creationDate")),
@@ -75,11 +75,11 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public User GetUser(string userId) {
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE id = @user", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_users WHERE id = @user", _connection);
         cmd.Parameters.AddWithValue("@user", userId);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
-        User userObj = new User();
+        User userObj = new();
         while (rdr.Read()) {
             userObj = new User {
                 Guid = rdr.GetString("id"),
@@ -95,7 +95,7 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public string GetUserId(string username) {
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username=@user", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_users WHERE username=@user", _connection);
         cmd.Parameters.AddWithValue("@user", username);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
@@ -110,11 +110,11 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public HomeworkTask GetTask(string taskId) {
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE id=@id", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_tasks WHERE id=@id", _connection);
         cmd.Parameters.AddWithValue("@id", taskId);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
-        HomeworkTask task = new HomeworkTask();
+        HomeworkTask task = new();
         while (rdr.Read()) {
             task.Id = rdr.GetString("id");
             task.Class = rdr.GetString("class");
@@ -134,7 +134,7 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public string GetOwnerOfTask(string taskId) {
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE id=@id", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_tasks WHERE id=@id", _connection);
         cmd.Parameters.AddWithValue("@id", taskId);
         using MySqlDataReader rdr = cmd.ExecuteReader();
         string owner = null;
@@ -148,13 +148,13 @@ public class MySqlStorage : IStorageMethod {
 
     public List<Dictionary<string, string>> GetTasks(string id) {
             
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE owner=@user", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_tasks WHERE owner=@user", _connection);
         cmd.Parameters.AddWithValue("@user", id);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
-        List<Dictionary<string, string>> tasks = new List<Dictionary<string, string>>();
+        List<Dictionary<string, string>> tasks = new();
         while (rdr.Read()) {
-            Dictionary<string, string> task = new Dictionary<string, string> {
+            Dictionary<string, string> task = new() {
                 {"class", rdr.GetString("class")},
                 {"classColour", rdr.GetString("classColour")},
                 {"task", rdr.GetString("task")},
@@ -174,7 +174,7 @@ public class MySqlStorage : IStorageMethod {
             
         Logger.Debug($"\nAuthenticating user: {username}");
             
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE username=@user", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_users WHERE username=@user", _connection);
         cmd.Parameters.AddWithValue("@user", username);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
@@ -209,7 +209,7 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public bool CreateUser(User user) {
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_users WHERE Username=@user", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_users WHERE Username=@user", _connection);
         cmd.Parameters.AddWithValue("@user", user.Username);
         using MySqlDataReader rdr = cmd.ExecuteReader();
 
@@ -225,7 +225,7 @@ public class MySqlStorage : IStorageMethod {
             return false;
         }
             
-        using MySqlCommand cmd2 = new MySqlCommand(
+        using MySqlCommand cmd2 = new(
             "INSERT INTO hw_users (id, username, password, creationDate) VALUES (@id, @user, @pass, @creationDate)",
             _connection);
         cmd2.Parameters.AddWithValue("@id", user.Guid);
@@ -238,7 +238,7 @@ public class MySqlStorage : IStorageMethod {
     }
 
     public void RemoveUser(string id) {
-        using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_users WHERE id=@user", _connection);
+        using MySqlCommand cmd2 = new("DELETE FROM hw_users WHERE id=@user", _connection);
         cmd2.Parameters.AddWithValue("@user", id);
         cmd2.ExecuteNonQuery();
         Logger.Debug($"Removed User: {id}");
@@ -252,7 +252,7 @@ public class MySqlStorage : IStorageMethod {
         bool success = Converter.TryConvertDicToTask(values, out HomeworkTask task);
         if (!success) { return false; }  // Invalid
 
-        Dictionary<string, string> outData = new Dictionary<string, string> {
+        Dictionary<string, string> outData = new() {
             { "class", task.Class },
             { "classColour", task.ClassColour },
             { "task", task.Task },
@@ -263,7 +263,7 @@ public class MySqlStorage : IStorageMethod {
         };
             
         // check mysql database for duplicate id
-        using MySqlCommand cmd = new MySqlCommand("SELECT * FROM hw_tasks WHERE id=@id", _connection);
+        using MySqlCommand cmd = new("SELECT * FROM hw_tasks WHERE id=@id", _connection);
         cmd.Parameters.AddWithValue("@id", task.Id);
         using MySqlDataReader rdr = cmd.ExecuteReader();
         bool exists = false;
@@ -274,7 +274,7 @@ public class MySqlStorage : IStorageMethod {
         rdr.Close();
         if (exists) {
             // replace it
-            using MySqlCommand replaceCmd = new MySqlCommand(
+            using MySqlCommand replaceCmd = new(
                 "UPDATE hw_tasks SET class=@class, classColour=@classColour, task=@task, ttype=@type, typeColour=@typeColour, dueDate=@dueDate WHERE id=@id",
                 _connection);
             replaceCmd.Parameters.AddWithValue("@class", task.Class);
@@ -289,7 +289,7 @@ public class MySqlStorage : IStorageMethod {
             return true;
         }
             
-        using MySqlCommand cmd2 = new MySqlCommand(
+        using MySqlCommand cmd2 = new(
             "INSERT INTO hw_tasks (owner, class, classColour, task, ttype, typeColour, dueDate, id) " +
             "VALUES (@user, @class, @cc, @task, @ttype, @tc, @due, @id)", _connection);
         cmd2.Parameters.AddWithValue("@user", userId);
@@ -307,7 +307,7 @@ public class MySqlStorage : IStorageMethod {
     public bool TryAddTask(string username, Dictionary<string, string> values) => TryAddTask(username, values, out _);
 
     public bool RemoveTask(string userId /* This is needed for RAMManager because of the way it is setup */, string id) {
-        using MySqlCommand cmd2 = new MySqlCommand("DELETE FROM hw_tasks WHERE id=@id", _connection);
+        using MySqlCommand cmd2 = new("DELETE FROM hw_tasks WHERE id=@id", _connection);
         cmd2.Parameters.AddWithValue("@id", id);
         cmd2.ExecuteNonQuery();
         Logger.Debug($"Removed: {id} from {userId}'s tasks");
@@ -319,7 +319,7 @@ public class MySqlStorage : IStorageMethod {
         if (field == "classColour" || field == "typeColour") { ColorFromStr(newValue); }
         if (field == "dueDate") { DateTime.FromBinary(long.Parse(newValue)); }
             
-        using MySqlCommand cmd2 = new MySqlCommand("UPDATE hw_tasks SET @field=@value WHERE id=@id", _connection);
+        using MySqlCommand cmd2 = new("UPDATE hw_tasks SET @field=@value WHERE id=@id", _connection);
         cmd2.Parameters.AddWithValue("@field", field);
         cmd2.Parameters.AddWithValue("@value", newValue);
         cmd2.Parameters.AddWithValue("@id", id);
@@ -387,7 +387,7 @@ public class MySqlStorage : IStorageMethod {
     }
 
     private void SendMySqlStatement(string statement) {
-        using MySqlCommand cmd = new MySqlCommand();
+        using MySqlCommand cmd = new();
         cmd.Connection = _connection;
         cmd.CommandText = statement;
         cmd.ExecuteNonQuery();

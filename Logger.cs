@@ -59,7 +59,7 @@ public static class Logger {
             originalFileStream.Seek(0, SeekOrigin.Begin);
 
             using FileStream compressedFileStream = File.Create(gzFileLoc);
-            using GZipStream compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
+            using GZipStream compressor = new(compressedFileStream, CompressionMode.Compress);
             originalFileStream.CopyTo(compressor);
         }
 

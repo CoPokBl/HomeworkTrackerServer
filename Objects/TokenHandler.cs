@@ -16,9 +16,9 @@ public static class TokenHandler {
     /// <returns>The resulting JWT</returns>
     public static string GenerateToken(string id) {
         string mySecret = Program.Config["TokenSecret"];
-        SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
-        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-        SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor {
+        SymmetricSecurityKey securityKey = new(Encoding.ASCII.GetBytes(mySecret));
+        JwtSecurityTokenHandler tokenHandler = new();
+        SecurityTokenDescriptor tokenDescriptor = new() {
             Subject = new ClaimsIdentity(new[] {
                 new Claim("id", id),
                 new Claim("password", Program.Storage.GetUserPassword(id))
@@ -40,8 +40,8 @@ public static class TokenHandler {
     /// <returns>Whether or not the token is valid</returns>
     public static bool ValidateCurrentToken(string token, out string id) {
         string mySecret = Program.Config["TokenSecret"];
-        SymmetricSecurityKey mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
-        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+        SymmetricSecurityKey mySecurityKey = new(Encoding.ASCII.GetBytes(mySecret));
+        JwtSecurityTokenHandler tokenHandler = new();
         SecurityToken validToken;
         try {
             tokenHandler.ValidateToken(token, new TokenValidationParameters {
@@ -57,7 +57,7 @@ public static class TokenHandler {
             id = null;
             return false;
         }
-        JwtSecurityTokenHandler tokenHandler2 = new JwtSecurityTokenHandler();
+        JwtSecurityTokenHandler tokenHandler2 = new();
         JwtSecurityToken securityToken = tokenHandler2.ReadToken(token) as JwtSecurityToken;
         string oid = null;
         string pass = null;

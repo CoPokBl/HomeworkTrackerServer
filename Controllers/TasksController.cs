@@ -13,6 +13,7 @@ namespace HomeworkTrackerServer.Controllers;
 public class TasksController : ApiController {
 
     [HttpGet]
+    [HttpHead]
     public ActionResult GetTasks() {
             
         // Auth
@@ -24,6 +25,7 @@ public class TasksController : ApiController {
     }
         
     [HttpGet("{id}")]
+    [HttpHead("{id}")]
     public ActionResult GetSpecificTask(string id) {
             
         Logger.Debug("Looking for task with id: " + id);

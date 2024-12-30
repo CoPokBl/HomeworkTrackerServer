@@ -11,6 +11,7 @@ namespace HomeworkTrackerServer.Controllers;
 public class LoginController : ApiController {
         
     [HttpGet]
+    [HttpHead]
     // Login
     public IActionResult Login([FromHeader] AuthorizationHeaderParams authorization) {
 

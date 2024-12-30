@@ -8,6 +8,7 @@ namespace HomeworkTrackerServer.Controllers;
 public class ApiRootController : ApiController {
 
     [HttpGet]
+    [HttpHead]
     public ActionResult GetRequest() {
         // Give them the API version
         return Ok($"Homework Tracker API, made by CoPokBl using ASP.NET. Version {Program.Ver}.");

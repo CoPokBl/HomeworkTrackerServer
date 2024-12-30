@@ -16,6 +16,7 @@ namespace HomeworkTrackerServer.Controllers;
 public class UsersController : ApiController {
         
     [HttpGet]
+    [HttpHead]
     // Gets list of users (only for server admins)
     public async Task<ActionResult> GetUser([FromQuery] string username) {
             
@@ -64,7 +65,7 @@ public class UsersController : ApiController {
         }
             
         // do da thing
-        User internalUser = new User(externalUser);
+        User internalUser = new(externalUser);
         if (!Program.Storage.CreateUser(internalUser)) {
             // failed
             return Conflict();
@@ -97,7 +98,7 @@ public class UsersController : ApiController {
 
         // do it ig
         if (originalPassword != externalUser.Password) {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(externalUser.Password))) {
                 builder.Append(t.ToString("x2"));
             }

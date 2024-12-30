@@ -12,7 +12,7 @@ public class RamStorage : IStorageMethod {
     protected Dictionary<string, List<Dictionary<string, string>>> Tasks;  // Username, list of tasks
         
     private static string Hash(string str) {
-        StringBuilder builder = new StringBuilder();  
+        StringBuilder builder = new();  
         foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(str))) {
             builder.Append(t.ToString("x2"));
         }
@@ -74,7 +74,7 @@ public class RamStorage : IStorageMethod {
         bool success = Converter.TryConvertDicToTask(values, out HomeworkTask task);
         if (!success) { return false; }  // Invalid
 
-        Dictionary<string, string> outData = new Dictionary<string, string> {
+        Dictionary<string, string> outData = new() {
             { "class", task.Class },
             { "classColour", task.ClassColour },
             { "task", task.Task },

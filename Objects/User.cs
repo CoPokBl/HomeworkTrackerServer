@@ -14,7 +14,7 @@ public class User {
 
     public User(ExternalUser externalUser) {
         Username = externalUser.Username;
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         foreach (byte t in SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(externalUser.Password))) {
             builder.Append(t.ToString("x2"));
         }

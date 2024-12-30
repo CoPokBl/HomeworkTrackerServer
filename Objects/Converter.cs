@@ -38,12 +38,12 @@ public static class Converter {
         string id = Guid.NewGuid().ToString();
         long dueDate = 0;
 
-        if (values.ContainsKey("class")) { classText = values["class"]; }
-        if (values.ContainsKey("classColour")) { classColour = values["classColour"]; }
-        if (values.ContainsKey("task")) { task = values["task"]; }
-        if (values.ContainsKey("type")) { typeText = values["type"]; }
-        if (values.ContainsKey("typeColour")) { typeColour = values["typeColour"]; }
-        if (!sanitizeInputs) { if (values.ContainsKey("id")) { id = values["id"]; } }
+        if (values.TryGetValue("class", out string classV)) { classText = classV; }
+        if (values.TryGetValue("classColour", out string classColourV)) { classColour = classColourV; }
+        if (values.TryGetValue("task", out string taskV)) { task = taskV; }
+        if (values.TryGetValue("type", out string typeV)) { typeText = typeV; }
+        if (values.TryGetValue("typeColour", out string typeColourV)) { typeColour = typeColourV; }
+        if (!sanitizeInputs) { if (values.TryGetValue("id", out string idV)) { id = idV; } }
 
         try {
             if (values.ContainsKey("dueDate")) {

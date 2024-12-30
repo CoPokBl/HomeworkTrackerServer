@@ -9,6 +9,7 @@ namespace HomeworkTrackerServer.Controllers;
 public class InfoPageController : ApiController {
         
     [HttpGet]
+    [HttpHead]
     public async Task<ActionResult> GetPage() {
         // Give it to them
         return Ok("HomeworkTrackerServer");
